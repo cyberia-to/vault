@@ -6,21 +6,21 @@ version: 0.1
 # Durable storage
 
 Vault stores encrypted application records through Cybergraph over one existing
-BBG Database owner. A separate plaintext seed file, second database writer or
+BBG Database owner. A separate plaintext spell file, second database writer or
 independent Vault history/WAL is not part of this design. The SSD working profile
 uses BBG's Fjall path; an explicitly selected HDD/archive profile uses redb.
 Backend choice belongs to the shared owner. RAM-only success is not durable.
 
 ## Envelope and keys
 
-Use a high-entropy storage key independent of neuron seeds, with versioned
+Use a high-entropy storage key independent of neuron spells, with versioned
 authenticated encryption and a nonce policy qualified for retries, restore and
 multiple device epochs. Each envelope binds its logical vault scope, object,
 kind/schema, purpose, cryptographic profile, key epoch and revision against
 substitution. Authentication of an envelope alone proves neither permission
 to advance history nor that it is the latest revision.
 
-Root seeds, entries, service names, subject associations, policy-sensitive
+Root spells, entries, service names, subject associations, policy-sensitive
 metadata and protected-use receipts MUST be sealed before reaching the store.
 Content addressing applies to ciphertext. Unkeyed hashes of passwords, PINs or
 other low-entropy plaintext MUST NOT become public IDs, request fingerprints or
@@ -29,7 +29,7 @@ deduplication keys. A profile states exactly which headers/lengths remain visibl
 Device/unlock and independent recovery mechanisms wrap the storage key under
 separate declared policies. Passphrase profiles require a salted memory-hard
 KDF and measured parameters; a low-entropy PIN alone cannot protect a copied
-database against offline guessing. Unlock MUST NOT require the same locked seed.
+database against offline guessing. Unlock MUST NOT require the same locked spell.
 Key separation also covers storage, replication authentication, recovery and
 neuron authority. Cryptographic algorithms remain Mudra/profile responsibilities.
 

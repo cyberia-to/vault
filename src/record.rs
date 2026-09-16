@@ -14,7 +14,7 @@ pub enum SecretKind {
     Totp = 4,
     Hotp = 5,
     RecoveryCodes = 6,
-    Bip39Seed = 7,
+    Spell = 7,
     DomainRoot = 8,
 }
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -64,13 +64,14 @@ impl SecretInput {
         getrandom::getrandom(bytes.as_mut()).map_err(|_| Error::Entropy)?;
         Self::domain_root(bytes)
     }
-    pub fn mnemonic(words: &str, passphrase: &str) -> Result<Self> {
+    pub fn spell(words: &str, passphrase: &str) -> Result<Self> {
         if words.len() > 1024 || passphrase.len() > 1024 {
             return Err(Error::Limit);
         }
-        let seed =
-            Zeroizing::new(mudra::seed::seed(words, passphrase).map_err(|_| Error::InvalidInput)?);
-        Self::bytes(SecretKind::Bip39Seed, Zeroizing::new(seed.to_vec()))
+        let spell = Zeroizing::new(
+            mudra::spell::derive(words, passphrase).map_err(|_| Error::InvalidInput)?,
+        );
+        Self::bytes(SecretKind::Spell, Zeroizing::new(spell.to_vec()))
     }
     pub fn totp(
         key: Zeroizing<Vec<u8>>,
@@ -133,7 +134,7 @@ impl SecretInput {
             }
             Payload::Bytes(SecretKind::Pin, v) => !v.is_empty() && v.len() <= 128,
             Payload::Bytes(SecretKind::DomainRoot, v) => v.len() == 32,
-            Payload::Bytes(SecretKind::Bip39Seed, v) => v.len() == 64,
+            Payload::Bytes(SecretKind::Spell, v) => v.len() == 64,
             Payload::Bytes(_, _) => false,
             Payload::Otp {
                 key,
@@ -198,7 +199,7 @@ impl SecretInput {
             4 => SecretKind::Totp,
             5 => SecretKind::Hotp,
             6 => SecretKind::RecoveryCodes,
-            7 => SecretKind::Bip39Seed,
+            7 => SecretKind::Spell,
             8 => SecretKind::DomainRoot,
             _ => return Err(Error::Unsupported),
         };

@@ -54,7 +54,7 @@ bounds. A password entry needs no neuron; a watch-only attachment needs no key.
 Derivation domain, protocol subject, destination network, endpoint and display
 format MUST remain distinct. Supported foreign addresses retain their protocol
 representation. Changing a machine, worker or endpoint MUST NOT change a
-neuron's key or subject. Seed-derived scope does not authorize its use.
+neuron's key or subject. Spell-derived scope does not authorize its use.
 
 ## Trust boundary
 
@@ -62,7 +62,7 @@ The initial native profile isolates plaintext custody from ordinary application,
 plugin and agent processes using authenticated bounded IPC and a declared OS
 protection profile. Only reviewed operations and cryptographic adapters execute
 with secrets. UI/model state, general workers, logs and transport cannot receive
-root seeds or private keys.
+root spells or private keys.
 
 The trusted computing base includes the custody process, relevant OS/hardware,
 approved crypto/prover code, protected entry/confirmation and Ward's protected
@@ -101,7 +101,7 @@ Local password/OTP use needs no VM, network or proof worker.
 
 Open, unlock and recovery MUST work through an authenticated local private store
 before any signing neuron is available. Unlock cannot require a signature from
-that same locked seed or a password stored only inside it. Bootstrap permission
+that same locked spell or a password stored only inside it. Bootstrap permission
 belongs to a declared device/recovery ceremony under Ward's authority model.
 
 Stack foundations:

@@ -6,7 +6,7 @@ version: 0.1
 # Recovery
 
 Vault recovery reconstructs secret custody and protected-use state at an explicit
-verified revision. A successful decrypt, known seed or collection of valid entries
+verified revision. A successful decrypt, known spell or collection of valid entries
 does not establish complete or current recovery.
 
 ## Independent recovery material
@@ -26,19 +26,19 @@ available only inside that same lost Vault, nor can its sole location be an
 unbacked cursor on the lost device. Replica login credentials must not introduce
 the same circular dependency.
 
-The factor is custody-level authority. Device unlock, neuron root seed, stored
-service credentials and recovery material are different roles. No raw seed
-export/copy operation is introduced. A future raw-mnemonic ceremony requires an
+The factor is custody-level authority. Device unlock, neuron root spell, stored
+service credentials and recovery material are different roles. No raw spell
+export/copy operation is introduced. A future raw-spell ceremony requires an
 explicitly weaker export profile. An independent recovery factor may itself
 require protected offline storage; losing every opening path makes otherwise
 intact ciphertext unrecoverable.
 
-## What survives a seed
+## What survives a spell
 
-| Material | Recoverable from a neuron seed alone? | Additional requirement |
+| Material | Recoverable from a neuron spell alone? | Additional requirement |
 |---|---|---|
 | Deterministic derived neuron keys | Only with the original derivation profile/scope and necessary metadata | Locate the declared profiles and epochs |
-| Imported passwords, OTP seeds and tokens | No | Durable encrypted entry records and storage-key recovery |
+| Imported passwords, OTP enrollment keys and tokens | No | Durable encrypted entry records and storage-key recovery |
 | HOTP counters, recovery-code use, quotas and revocations | No | Fresh authenticated state, surviving reservations and reconciliation |
 | Hardware-bound non-exportable credentials | Not in general | Hardware-specific migration, provider re-enrollment or alternate authority |
 | Payment notes and spendability | No | Retained ciphertext/openings and verified payment-history recovery |

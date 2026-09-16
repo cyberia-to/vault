@@ -145,7 +145,7 @@ cannot reveal the omission: [recovery freshness](recovery.md) is a separate gate
 
 ## Privacy and provider independence
 
-Plaintext entries, service labels, seeds and reusable view/spend keys never reach
+Plaintext entries, service labels, spells and reusable view/spend keys never reach
 replicas/relays. Store-facing IDs SHOULD avoid publishing neuron or service
 associations. Stable ciphertext equality, lengths, access times and peer addresses
 may still correlate activity; the profile declares this leakage and its padding.

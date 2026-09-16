@@ -13,7 +13,7 @@ secret reference; possession of a reference grants no authority.
 
 | Kind | Normal operation | Permitted disclosure |
 |---|---|---|
-| Root seed / mnemonic | Generate/import; derive purpose-scoped keys and neurons; sealed backup | No raw read/reveal/copy through application APIs |
+| Spell (root words/material) | Generate/import; derive purpose-scoped keys and neurons; sealed backup | No raw read/reveal/copy through application APIs |
 | Private signing / authority key | Authorize an exact action or approved proof | Authorization/proof result only |
 | Discovery / payload / channel / wrapping key | Purpose-bound agreement, discovery, seal/open or wrapping | Declared results only; internal storage keys cannot serve generic decryption |
 | Password / PIN | Deliver to the bound service/device | Recipient receives the value; trusted reveal/export requires a separate explicit grant |
@@ -22,7 +22,7 @@ secret reference; possession of a reference grants no authority.
 | API token / service credential | Authenticate through a bound adapter | Approved audience receives the necessary credential; no implicit agent/model disclosure |
 | Passkey credential | Produce an assertion for a relying party and challenge | Assertion only; portability follows the actual custody profile |
 
-Kind, permission and custody level are separate. Retagging a seed MUST NOT enable
+Kind, permission and custody level are separate. Retagging a spell MUST NOT enable
 password reveal. Unknown kinds or versions fail closed. Extensions require a
 reviewed schema and operation set, not arbitrary plugins running with secrets.
 
@@ -66,7 +66,7 @@ selection or ledger record; Sigma/host composition owns attachment management.
 Rotation of a key-derived subject requires the original key or an explicitly
 specified authority transition to retain the subject.
 
-Generation, mnemonic parsing and HD derivation execute behind custody. Low-level
+Generation, spell parsing and HD derivation execute behind custody. Low-level
 arithmetic may live in Mudra; callers stop receiving raw keys from those helpers.
 Mudra's [private programmable authority](https://github.com/cyberia-to/mudra/blob/master/specs/identity.md)
 can use the same boundary through a qualified private-proof profile. Moving
@@ -91,3 +91,12 @@ OTP profiles pin parameters and time/counter authority. Callers cannot request
 arbitrary future time steps or rewind HOTP. TOTP may repeat within a time window;
 Vault cannot guarantee one-time acceptance at an external provider. HOTP and
 recovery-code use require durable reservations and [retry rules](authorization.md).
+
+## Spell terminology and compatibility
+
+`spell` is the Cyber term for root recovery words and their derived root material.
+APIs distinguish `words` from derived bytes. The BIP-39 profile keeps its exact
+word parsing, passphrase handling and 64-byte derivation. `SecretKind::Spell`
+keeps wire tag 7; existing encrypted records remain readable. Renaming changes
+no key, address, neuron, domain separator or ciphertext format. Standard-library
+and third-party BIP-39 API names remain at the interoperability boundary.

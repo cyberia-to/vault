@@ -66,12 +66,12 @@ pub(crate) fn perform(entry: &mut Entry, operation: &Operation, now: u64) -> Res
                 return Err(Error::Denied);
             };
             let (public_key, address) = match (&key.derivation, kind) {
-                (Derivation::Cosmos { path, hrp }, SecretKind::Bip39Seed) => {
-                    let seed = Zeroizing::new(
+                (Derivation::Cosmos { path, hrp }, SecretKind::Spell) => {
+                    let spell = Zeroizing::new(
                         <[u8; 64]>::try_from(bytes.as_slice()).map_err(|_| Error::Corrupt)?,
                     );
                     let signing =
-                        mudra::seed::signing_key(&seed, path).map_err(|_| Error::InvalidInput)?;
+                        mudra::spell::signing_key(&spell, path).map_err(|_| Error::InvalidInput)?;
                     let public = mudra::cosmos::compressed(signing.verifying_key());
                     let address =
                         mudra::cosmos::address(&public, hrp).map_err(|_| Error::InvalidInput)?;

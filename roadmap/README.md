@@ -6,6 +6,11 @@ recovery. [Evidence](../audit/local-custody-2026-09-16/README.md) records exactl
 what ran. It covers parts of A–D; none of the deployment packages below is fully
 qualified. Each package produces reviewable code and evidence in `audit/`.
 
+The [local operator CLI](../docs/cli.md) now exercises these library operations,
+with command-scoped authorization, protected terminal input/output, retained host
+anchors and uncertain-genesis reconciliation. Its [qualification record](../audit/spell-cli-2026-09-16/README.md)
+covers the local host; package E still includes actual Cyb/Neuron custody migration.
+
 | Package | Work | Exit evidence |
 |---|---|---|
 | A — pin the first profile | Canonical schemas/encodings and bounds; crypto/envelope/KDF profiles; OS isolation and protected input; Ward freshness; replica receipt and fencing/recovery-anchor choice | Versioned profile covers every open boundary in specs/README; threat and failure assumptions explicit |
