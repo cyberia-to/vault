@@ -27,9 +27,9 @@ proposal's specific adapter already exists. The first profile must select and
 qualify the real adapter; native local BBG/Cybergraph commits alone do not supply
 distributed fencing, private replication or current recovery anchors.
 
-## Evidence status
+## Initial design baseline
 
-This initial repository contains product/specification documents only. No Vault
+The initial repository commit contained product/specification documents only. No Vault
 runtime tests, private sync benchmark, power-loss test or restore drill has run
 as part of this change. The conformance matrix is a set of required future tests.
 No real seed, key, password, OTP enrollment or recovery file was opened or imported.
@@ -39,3 +39,10 @@ Document validation passed for the initial design: 12 Markdown documents,
 balanced code fences/table columns, draft spec labels, Git whitespace checks
 and the stack's NTFS filename check. This checks document structure and local
 source references, not runtime behavior or remote service availability.
+
+## Local library evidence
+
+[Local custody — 2026-09-16](local-custody-2026-09-16/README.md) records the first
+Rust implementation, synthetic recovery drill, failure tests and deployment
+gaps. This supersedes the baseline's lack of runtime evidence without claiming
+the complete conformance matrix has passed.

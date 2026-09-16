@@ -12,8 +12,11 @@ the stack's first end-to-end storage and synchronization use case. It is also
 the secret-custody organ of [cyb](https://github.com/cyberia-to/cyb), available
 to headless hosts through the same contract.
 
-**Stage: specification.** This repository defines the product and its contracts.
-There is no Vault runtime or installable release yet.
+**Stage: local custody library.** Rust code now stores typed secrets through
+Cybergraph/BBG, reserves protected uses, verifies encrypted local replicas and
+restores against an independently retained revision. The isolated native service,
+production Ward adapter and authenticated network sync remain implementation work.
+There is no production/installable release yet.
 
 ## What Vault should make possible
 
@@ -74,3 +77,21 @@ encrypted replicas, explicit device handover and recovery after loss of the
 writer. [Conformance](specs/conformance.md) defines the gates;
 [the roadmap](roadmap/README.md) orders the work. Concurrent offline writers
 require a later qualified profile.
+
+## Try the implemented slice
+
+With compatible sibling stack checkouts, run the synthetic recovery demonstration:
+
+```sh
+cargo run --release --example recovery --locked
+```
+
+It stores a test credential, verifies two encrypted copies, performs an authorized
+use, removes the primary store and one replica, then restores read-only from the
+remaining copy. It creates only temporary test data; all copies are on the same
+test machine, so this demonstrates recovery logic rather than hardware
+failure-domain independence.
+
+[Library integration](docs/local-custody.md) ·
+[Local profile](specs/local-profile.md) ·
+[Evidence and remaining gates](audit/local-custody-2026-09-16/README.md)

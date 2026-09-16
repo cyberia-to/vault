@@ -1,0 +1,82 @@
+   Compiling libc v0.2.189
+   Compiling serde v1.0.229
+   Compiling getrandom v0.2.17
+   Compiling cpufeatures v0.2.17
+   Compiling errno v0.3.14
+   Compiling getrandom v0.4.3
+   Compiling rustix v1.1.4
+   Compiling rand_core v0.6.4
+   Compiling crypto-common v0.1.7
+   Compiling ff v0.13.1
+   Compiling crypto-bigint v0.5.5
+   Compiling rand_chacha v0.3.1
+   Compiling password-hash v0.5.0
+   Compiling digest v0.10.7
+   Compiling universal-hash v0.5.1
+   Compiling cipher v0.4.4
+   Compiling aead v0.5.2
+   Compiling group v0.13.0
+   Compiling rand v0.8.8
+   Compiling poly1305 v0.8.0
+   Compiling hmac v0.12.1
+   Compiling signature v2.2.0
+   Compiling sha2 v0.10.9
+   Compiling ripemd v0.1.3
+   Compiling blake2 v0.10.6
+   Compiling sha1 v0.10.7
+   Compiling chacha20 v0.9.1
+   Compiling rfc6979 v0.4.0
+   Compiling pbkdf2 v0.12.2
+   Compiling bs58 v0.5.1
+   Compiling chacha20poly1305 v0.10.1
+   Compiling argon2 v0.5.3
+   Compiling bip39 v2.2.2
+   Compiling tempfile v3.27.0
+   Compiling elliptic-curve v0.13.8
+   Compiling ecdsa v0.16.9
+   Compiling k256 v0.13.4
+   Compiling bip32 v0.5.3
+   Compiling cyber-mudra v0.1.0 (/Users/master/cyber/mudra)
+   Compiling cyber-vault v0.1.0 (/Users/master/cyber/vault)
+    Finished `release` profile [optimized] target(s) in 3.26s
+     Running unittests src/lib.rs (target/release/deps/vault-3e0edc1651258a54)
+
+running 5 tests
+test state::tests::canonical_genesis_fixture_rejects_truncation_trailing_and_hostile_counts ... ok
+test use_secret::tests::hotp_matches_rfc4226_independent_vectors ... ok
+test crypto::tests::repeated_plaintext_uses_distinct_nonces_and_ciphertexts ... ok
+test use_secret::tests::totp_matches_rfc6238_sha1_and_sha256_vectors ... ok
+test crypto::tests::every_packet_byte_is_authenticated_or_structurally_rejected ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/custody.rs (target/release/deps/custody-f7c6ddaddff66f32)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/input_bounds.rs (target/release/deps/input_bounds-6ab090da8f61fdbf)
+
+running 1 test
+test malformed_or_oversized_secret_inputs_reject_without_echoing_content ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/otp_identity.rs (target/release/deps/otp_identity-159e70f764df4098)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/recovery_faults.rs (target/release/deps/recovery_faults-41e845573d641f4a)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests vault
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s

@@ -1,0 +1,66 @@
+[
+  {
+    "check": "tests",
+    "command": [
+      "cargo",
+      "test",
+      "--release",
+      "--all-targets",
+      "--locked"
+    ],
+    "exit_code": 0,
+    "elapsed_seconds": 33.209
+  },
+  {
+    "check": "core-tests",
+    "command": [
+      "cargo",
+      "test",
+      "--release",
+      "--no-default-features",
+      "--locked"
+    ],
+    "exit_code": 0,
+    "elapsed_seconds": 4.818
+  },
+  {
+    "check": "example",
+    "command": [
+      "cargo",
+      "run",
+      "--release",
+      "--example",
+      "recovery",
+      "--locked"
+    ],
+    "exit_code": 0,
+    "elapsed_seconds": 3.321
+  },
+  {
+    "check": "clippy",
+    "command": [
+      "cargo",
+      "clippy",
+      "--all-targets",
+      "--no-deps",
+      "--locked",
+      "--",
+      "-D",
+      "warnings"
+    ],
+    "exit_code": 0,
+    "elapsed_seconds": 0.246
+  },
+  {
+    "check": "format",
+    "command": [
+      "cargo",
+      "fmt",
+      "--package",
+      "cyber-vault",
+      "--check"
+    ],
+    "exit_code": 0,
+    "elapsed_seconds": 0.056
+  }
+]

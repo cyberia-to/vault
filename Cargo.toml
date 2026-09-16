@@ -1,0 +1,39 @@
+[package]
+name = "cyber-vault"
+version = "0.1.0"
+edition = "2024"
+publish = false
+description = "Typed secret custody and durable encrypted records for soft3"
+repository = "https://github.com/cyberia-to/vault"
+
+[lib]
+name = "vault"
+
+[features]
+default = ["graph-store"]
+graph-store = ["dep:cybergraph"]
+
+[dependencies]
+argon2 = { version = "0.5.3", features = ["zeroize"] }
+chacha20poly1305 = "0.10.1"
+getrandom = "0.2"
+hmac = "0.12"
+sha1 = "0.10"
+sha2 = "0.10"
+zeroize = { version = "1", features = ["derive"] }
+subtle = "2"
+mudra = { package = "cyber-mudra", path = "../mudra" }
+hemera = { package = "cyber-hemera", path = "../hemera/rs" }
+cybergraph = { path = "../cybergraph", features = ["local-storage"], optional = true }
+
+[dev-dependencies]
+tempfile = "3"
+
+[[example]]
+name = "recovery"
+required-features = ["graph-store"]
+
+[lints.rust]
+unsafe_code = "forbid"
+
+[workspace]

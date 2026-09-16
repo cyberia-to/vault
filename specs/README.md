@@ -23,6 +23,7 @@ unqualified cryptographic parameters.
 | [Synchronization](synchronization.md) | Replicas, device roles, writer epochs, conflicts and retention |
 | [Recovery](recovery.md) | Independent recovery material, freshness and loss scenarios |
 | [Conformance](conformance.md) | Cross-stack acceptance gates and release evidence |
+| [Local custody profile](local-profile.md) | Bounded library format, cryptographic parameters and trusted-host assumptions |
 
 ## Fixed decisions
 
@@ -55,3 +56,7 @@ authentication and recovery-anchor mechanism. These details belong to explicit
 profile definitions here; they MUST NOT emerge as undocumented implementation
 defaults. [The roadmap](../roadmap/README.md) makes those decisions the first
 implementation package.
+
+`local-custody-v1` pins a smaller library profile for development. It does not
+relax the native service, authenticated replication or writer-transfer gates of
+the target deployment. Implementation evidence belongs in [audit](../audit/README.md).

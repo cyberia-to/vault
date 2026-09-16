@@ -1,0 +1,359 @@
+{
+  "date": "2026-09-16",
+  "host": "macOS-26.4.1-arm64-arm-64bit-Mach-O",
+  "rustc": "rustc 1.95.0 (59807616e 2026-04-14) (Homebrew)",
+  "cargo": "cargo 1.95.0 (f2d3ce0bd 2026-03-21) (Homebrew)",
+  "digest_method": "SHA256 over sorted relative filename + NUL + SHA256(file bytes) for git-visible Rust/Cargo files under each package; hashes record local work, not publish it. Dependencies are not pinned by Cargo.lock.",
+  "local_dependencies": [
+    {
+      "package": "bbg",
+      "version": "0.3.0",
+      "path": "bbg/rs",
+      "repository": "bbg",
+      "head": "8e886aa0c26585faa6c8ddc26ada46b795b05905",
+      "repository_dirty_entries": 37,
+      "rust_and_cargo_files": 112,
+      "source_digest_sha256": "3c0e47dbf6e16116c382f4b6d0998b815c06014c5d7ad8f67100b5753e053123"
+    },
+    {
+      "package": "cyber-hemera",
+      "version": "0.3.1",
+      "path": "hemera/rs",
+      "repository": "hemera",
+      "head": "4a6d1d46b0b1e852ea3141f2e97b33ceb5d79a75",
+      "repository_dirty_entries": 1,
+      "rust_and_cargo_files": 29,
+      "source_digest_sha256": "0ec3db0f09cd39583f75073820137f3e6ef55c7abb2b10ee981575bfcf38ac08"
+    },
+    {
+      "package": "cyber-lens",
+      "version": "0.2.0",
+      "path": "lens/src",
+      "repository": "lens",
+      "head": "9b134c4cc90c051bc3bafb330e1f7a7db9be9a98",
+      "repository_dirty_entries": 17,
+      "rust_and_cargo_files": 3,
+      "source_digest_sha256": "91f020f0768bee4edaa710b21f949d2ba77442b67f331585768122c3985c009f"
+    },
+    {
+      "package": "cyber-lens-assayer",
+      "version": "0.2.0",
+      "path": "lens/assayer",
+      "repository": "lens",
+      "head": "9b134c4cc90c051bc3bafb330e1f7a7db9be9a98",
+      "repository_dirty_entries": 17,
+      "rust_and_cargo_files": 2,
+      "source_digest_sha256": "dbf64f858cc0cf92dbd14e02b441c08a2dd8223a0252afaa1f3a7414962e9a0f"
+    },
+    {
+      "package": "cyber-lens-binius",
+      "version": "0.1.1",
+      "path": "lens/binius",
+      "repository": "lens",
+      "head": "9b134c4cc90c051bc3bafb330e1f7a7db9be9a98",
+      "repository_dirty_entries": 17,
+      "rust_and_cargo_files": 2,
+      "source_digest_sha256": "1656d1d53461088d2056dd0c6cc899c799942e7ff96b046f35f179e525f430c4"
+    },
+    {
+      "package": "cyber-lens-brakedown",
+      "version": "0.2.0",
+      "path": "lens/brakedown",
+      "repository": "lens",
+      "head": "9b134c4cc90c051bc3bafb330e1f7a7db9be9a98",
+      "repository_dirty_entries": 17,
+      "rust_and_cargo_files": 9,
+      "source_digest_sha256": "de25a709668d9f52efeee1b0026d361fe4cdbb5b200e19821403f92a2ce725c0"
+    },
+    {
+      "package": "cyber-lens-core",
+      "version": "0.1.2",
+      "path": "lens/core",
+      "repository": "lens",
+      "head": "9b134c4cc90c051bc3bafb330e1f7a7db9be9a98",
+      "repository_dirty_entries": 17,
+      "rust_and_cargo_files": 6,
+      "source_digest_sha256": "c927eb03daab7f43de198e2babd524e4133f8e950e1f31f3c90a268438c0d8d6"
+    },
+    {
+      "package": "cyber-lens-ikat",
+      "version": "0.2.0",
+      "path": "lens/ikat",
+      "repository": "lens",
+      "head": "9b134c4cc90c051bc3bafb330e1f7a7db9be9a98",
+      "repository_dirty_entries": 17,
+      "rust_and_cargo_files": 2,
+      "source_digest_sha256": "55e8cc53c701dc122f12bd515ce77d2b8c60e33eacb304334c03b032d814d938"
+    },
+    {
+      "package": "cyber-lens-porphyry",
+      "version": "0.2.0",
+      "path": "lens/porphyry",
+      "repository": "lens",
+      "head": "9b134c4cc90c051bc3bafb330e1f7a7db9be9a98",
+      "repository_dirty_entries": 17,
+      "rust_and_cargo_files": 2,
+      "source_digest_sha256": "a87de7eee5d1b9da98e3a2886adc0465a40765557ebe829fa703a8619680b2d9"
+    },
+    {
+      "package": "cyber-mudra",
+      "version": "0.1.0",
+      "path": "mudra",
+      "repository": "mudra",
+      "head": "e2d1a63bccd760b96ba55f448ef338b7ab027c37",
+      "repository_dirty_entries": 10,
+      "rust_and_cargo_files": 27,
+      "source_digest_sha256": "944f085e6c54be89fbaa3ecf590281ab809ef8d1c15caca0509cc82d6d83d606"
+    },
+    {
+      "package": "cyber-nox",
+      "version": "0.3.0",
+      "path": "nox/rs",
+      "repository": "nox",
+      "head": "8a26448e44568ffc1704d942146ae7af6d2d39ed",
+      "repository_dirty_entries": 16,
+      "rust_and_cargo_files": 52,
+      "source_digest_sha256": "58cbb9f32279d896ed2b3479bd90905d00207fa7e6981e3c98563f7cbb4ae1f9"
+    },
+    {
+      "package": "cyber-tape",
+      "version": "0.1.0",
+      "path": "tape/impl/rust",
+      "repository": "tape",
+      "head": "a9e26cb5bbd597a7f96c3bfc1400c7f4575f5635",
+      "repository_dirty_entries": 1,
+      "rust_and_cargo_files": 6,
+      "source_digest_sha256": "3bbfe20cb4eaa8cb43fac760820b6a1c2487d618eb7b4e0969ed089cc6044a29"
+    },
+    {
+      "package": "cyber-tok",
+      "version": "0.1.1",
+      "path": "tok/rs",
+      "repository": "tok",
+      "head": "118058fee410e6417491b20fb56c92a37b8cfce9",
+      "repository_dirty_entries": 2,
+      "rust_and_cargo_files": 6,
+      "source_digest_sha256": "a2a4104bc29ef304748472e46eadad3ed8a206d4c2f6207a344046347992337a"
+    },
+    {
+      "package": "cyber-tru",
+      "version": "0.1.1",
+      "path": "tru/rs",
+      "repository": "tru",
+      "head": "5fdd0bbbe7a3592017d7eb7a8db212340288a6c1",
+      "repository_dirty_entries": 1,
+      "rust_and_cargo_files": 39,
+      "source_digest_sha256": "e5f413d68a10a73092bb34e1897f6e88ff9ce6640b3f923fc733509235cd0ba4"
+    },
+    {
+      "package": "cybergraph",
+      "version": "0.1.1",
+      "path": "cybergraph",
+      "repository": "cybergraph",
+      "head": "e9c86cab1bf09ce9329086fc3dec8916fe87882c",
+      "repository_dirty_entries": 38,
+      "rust_and_cargo_files": 41,
+      "source_digest_sha256": "c3aebe8eafa199b42e4519460f1437bf1ca409eabf3965c22913917a2e97e937"
+    },
+    {
+      "package": "fjall",
+      "version": "2.11.2",
+      "path": "bbg/rs/vendor/fjall",
+      "repository": "bbg",
+      "head": "8e886aa0c26585faa6c8ddc26ada46b795b05905",
+      "repository_dirty_entries": 37,
+      "rust_and_cargo_files": 53,
+      "source_digest_sha256": "325895e194ad09807bae0a5f1edc4cbf2169db3afda2ac907c17c93e13a720de"
+    },
+    {
+      "package": "foculus",
+      "version": "0.1.3",
+      "path": "foculus",
+      "repository": "foculus",
+      "head": "08a9d515cd127864b9b47feda9affd4da473c6c0",
+      "repository_dirty_entries": 6,
+      "rust_and_cargo_files": 45,
+      "source_digest_sha256": "15a5378eba3ae25f9e8c192e758b36b407165d81b786ddfe7c29c74721ab3099"
+    },
+    {
+      "package": "inf-ast",
+      "version": "0.1.0",
+      "path": "inf/rs/ast",
+      "repository": "inf",
+      "head": "a92eddff1a92c818dc58c9a19090486a26dcaa1e",
+      "repository_dirty_entries": 6,
+      "rust_and_cargo_files": 2,
+      "source_digest_sha256": "da73e4876b09a7521df8676e618a6f2a74bf8e1d716fb89657efcf0dfae16e31"
+    },
+    {
+      "package": "inf-eval",
+      "version": "0.1.0",
+      "path": "inf/rs/eval",
+      "repository": "inf",
+      "head": "a92eddff1a92c818dc58c9a19090486a26dcaa1e",
+      "repository_dirty_entries": 6,
+      "rust_and_cargo_files": 8,
+      "source_digest_sha256": "817e53abeb9445aaf742dc90cef2cd1d9826508bb5e14a9c3dd345d58b844c02"
+    },
+    {
+      "package": "inf-lex",
+      "version": "0.1.0",
+      "path": "inf/rs/lex",
+      "repository": "inf",
+      "head": "a92eddff1a92c818dc58c9a19090486a26dcaa1e",
+      "repository_dirty_entries": 6,
+      "rust_and_cargo_files": 2,
+      "source_digest_sha256": "a735f9fe419d27dc3a9a62a9418ce20e5fc57d7dd983e8073549779e7f1c064f"
+    },
+    {
+      "package": "inf-parse",
+      "version": "0.1.0",
+      "path": "inf/rs/parse",
+      "repository": "inf",
+      "head": "a92eddff1a92c818dc58c9a19090486a26dcaa1e",
+      "repository_dirty_entries": 6,
+      "rust_and_cargo_files": 2,
+      "source_digest_sha256": "b01a7f8265612ba0af5a8c5cf3a28e18559eb07547b3d0b74ddd4e67de73d72f"
+    },
+    {
+      "package": "inf-plan",
+      "version": "0.1.0",
+      "path": "inf/rs/plan",
+      "repository": "inf",
+      "head": "a92eddff1a92c818dc58c9a19090486a26dcaa1e",
+      "repository_dirty_entries": 6,
+      "rust_and_cargo_files": 2,
+      "source_digest_sha256": "e1f79a6424a5db4f80b7a08d85692b5196a0de35a387ddd1bc37900b22975fe8"
+    },
+    {
+      "package": "inf-source",
+      "version": "0.1.0",
+      "path": "inf/rs/source",
+      "repository": "inf",
+      "head": "a92eddff1a92c818dc58c9a19090486a26dcaa1e",
+      "repository_dirty_entries": 6,
+      "rust_and_cargo_files": 3,
+      "source_digest_sha256": "a9a78ea512507bf2a9b96fd8d8913a3b94023950ab168ebf57f6c6995bd1386d"
+    },
+    {
+      "package": "inf-value",
+      "version": "0.1.0",
+      "path": "inf/rs/value",
+      "repository": "inf",
+      "head": "a92eddff1a92c818dc58c9a19090486a26dcaa1e",
+      "repository_dirty_entries": 6,
+      "rust_and_cargo_files": 3,
+      "source_digest_sha256": "9a7a5769cf5898eaea57ee4d65b5f93a01f73494aa33021c4e48e8ec60c2e278"
+    },
+    {
+      "package": "neuron-id",
+      "version": "0.1.0",
+      "path": "neuron/id",
+      "repository": "neuron",
+      "head": "34bbff9dbf36421a45c5c283e6c1336dcafc997a",
+      "repository_dirty_entries": 93,
+      "rust_and_cargo_files": 2,
+      "source_digest_sha256": "bf5df8d8eef18eeb1c8a7ed14296782a7ba65d5e835d6d101f0bebfe170fb637"
+    },
+    {
+      "package": "strata-compute",
+      "version": "0.1.1",
+      "path": "strata/compute",
+      "repository": "strata",
+      "head": "7f6864abd2d989cfade7ffd0c13890de1f4b0c4e",
+      "repository_dirty_entries": 1,
+      "rust_and_cargo_files": 2,
+      "source_digest_sha256": "e4670e55cad9dd3c4f35588d999d72e0aeb5446d278fc87eab5059ecd4025e35"
+    },
+    {
+      "package": "strata-core",
+      "version": "0.1.1",
+      "path": "strata/core",
+      "repository": "strata",
+      "head": "7f6864abd2d989cfade7ffd0c13890de1f4b0c4e",
+      "repository_dirty_entries": 1,
+      "rust_and_cargo_files": 3,
+      "source_digest_sha256": "ccde8e9993b0c1fbc30bb1edb227d933838f88141bcd4379d4ddd5843fd3ea72"
+    },
+    {
+      "package": "strata-ext",
+      "version": "0.1.1",
+      "path": "strata/ext",
+      "repository": "strata",
+      "head": "7f6864abd2d989cfade7ffd0c13890de1f4b0c4e",
+      "repository_dirty_entries": 1,
+      "rust_and_cargo_files": 2,
+      "source_digest_sha256": "f336ff850a96e1c21de6e89e4d2f06ab8d2ebb4c33910ad7768d658b2b378bc7"
+    },
+    {
+      "package": "strata-genies",
+      "version": "0.1.1",
+      "path": "strata/genies/rs",
+      "repository": "strata",
+      "head": "7f6864abd2d989cfade7ffd0c13890de1f4b0c4e",
+      "repository_dirty_entries": 1,
+      "rust_and_cargo_files": 11,
+      "source_digest_sha256": "4948861f6d57f3f55f67bc17d94235466ba5b63307457a022307581298fe937e"
+    },
+    {
+      "package": "strata-jali",
+      "version": "0.1.1",
+      "path": "strata/jali/rs",
+      "repository": "strata",
+      "head": "7f6864abd2d989cfade7ffd0c13890de1f4b0c4e",
+      "repository_dirty_entries": 1,
+      "rust_and_cargo_files": 9,
+      "source_digest_sha256": "54d8d1a44da1bf6b20201e1d814e2807ca5cccd03ed2345660e8950b284d6139"
+    },
+    {
+      "package": "strata-kuro",
+      "version": "0.1.1",
+      "path": "strata/kuro/rs",
+      "repository": "strata",
+      "head": "7f6864abd2d989cfade7ffd0c13890de1f4b0c4e",
+      "repository_dirty_entries": 1,
+      "rust_and_cargo_files": 11,
+      "source_digest_sha256": "8e134d20037c703fe9cb39387ecee3a4527aec8e0df46425366d59adf82dd5e2"
+    },
+    {
+      "package": "strata-nebu",
+      "version": "0.1.1",
+      "path": "strata/nebu/rs",
+      "repository": "strata",
+      "head": "7f6864abd2d989cfade7ffd0c13890de1f4b0c4e",
+      "repository_dirty_entries": 1,
+      "rust_and_cargo_files": 19,
+      "source_digest_sha256": "50cd0c94482d15da202b1c86bc328681787230424f3e3498a8702bbee48d69bb"
+    },
+    {
+      "package": "strata-proof",
+      "version": "0.1.1",
+      "path": "strata/proof",
+      "repository": "strata",
+      "head": "7f6864abd2d989cfade7ffd0c13890de1f4b0c4e",
+      "repository_dirty_entries": 1,
+      "rust_and_cargo_files": 2,
+      "source_digest_sha256": "9965301a1bfbd14c5695552c0a4aa4af16e0f6867314ee7c5c428eadfaf264d4"
+    },
+    {
+      "package": "strata-trop",
+      "version": "0.1.1",
+      "path": "strata/trop/rs",
+      "repository": "strata",
+      "head": "7f6864abd2d989cfade7ffd0c13890de1f4b0c4e",
+      "repository_dirty_entries": 1,
+      "rust_and_cargo_files": 12,
+      "source_digest_sha256": "f87eb5a259c98fd6bee17969be4b7c9a8ed486342ec8877d8fd597463093abc8"
+    },
+    {
+      "package": "zheng",
+      "version": "0.4.0",
+      "path": "zheng/rs",
+      "repository": "zheng",
+      "head": "0670d3416b413550487344acd7bfd2c5e732546b",
+      "repository_dirty_entries": 31,
+      "rust_and_cargo_files": 55,
+      "source_digest_sha256": "63b3e0ff44e7fa9bb6ddcc0a580ac480bde5ad355a7b749baff67b5709253b14"
+    }
+  ]
+}

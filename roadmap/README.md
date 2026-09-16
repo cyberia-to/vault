@@ -1,8 +1,10 @@
 # Implementation order
 
-The current deliverable is this repository's product and specification design.
-Implementation follows after that baseline. Each package produces reviewable
-code and evidence in `audit/`; an API name or stub is not completion.
+The first local library now covers typed records, durable encrypted history,
+protected-use reservations, two-store readback verification and read-only
+recovery. [Evidence](../audit/local-custody-2026-09-16/README.md) records exactly
+what ran. It covers parts of A–D; none of the deployment packages below is fully
+qualified. Each package produces reviewable code and evidence in `audit/`.
 
 | Package | Work | Exit evidence |
 |---|---|---|
@@ -16,6 +18,25 @@ Implement packages B–D first against isolated synthetic stores. Do not migrate
 real user custody until reopen, independent restore and compatibility gates
 pass. Preserve original recovery material and legacy ciphertexts during explicit
 migration; do not claim deletion from SSDs or backups.
+
+## Next implementation sequence
+
+1. Publish compatible Cybergraph/BBG/Mudra dependency revisions and build this
+   slice from clean checkouts in CI. The initial evidence uses local sibling work.
+2. Wrap the library in native custody isolation and implement real Ward caller
+   authentication, current authorization and protected input/output adapters.
+   Keep the same `derive_neuron` results while moving Neuron clients behind them.
+3. Connect the selected stack transport to authenticated replica identities,
+   durable receipts, retention and resumable synchronization. Replace local copy
+   labels with a concrete deployment policy and evidence.
+4. Implement portable recovery locators, independent anchor retention, uncertain
+   genesis reconciliation and writer fencing/handover. Recovery must activate a
+   replacement device only after the previous writer is fenced.
+5. Exercise physical/process interruption and device-loss drills across the
+   selected backends/platforms, then qualify migration and a scoped release.
+
+Password/recovery-factor rotation, efficient checkpoints/compaction and remaining
+secret-use adapters also need versioned formats and tests before general use.
 
 Later profiles may add concurrent devices, hardware-native custody, passkeys,
 private proving, threshold recovery and stronger traffic privacy. They must
