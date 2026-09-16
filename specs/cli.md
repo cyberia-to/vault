@@ -13,6 +13,13 @@ Ward integration.
 Running `vault` without arguments prints the same help as `vault --help` to
 stdout, exits successfully and does not open or create a host directory.
 
+The help screen follows the Mudra/Cyb terminal style: a six-color ANSI Shadow
+wordmark, muted headings, aligned commands and short examples. Commands are
+grouped by custody, use and recovery; names, descriptions and flags come from
+the parser schema. Subcommand help uses the same palette. Redirected help omits
+the wordmark and ANSI escapes; `NO_COLOR` disables color and `TERM=dumb` selects
+the compact plain presentation. Command results retain their JSON format.
+
 | Command | Contract |
 |---|---|
 | `init --recovery-file PATH` | Create a store and a new, exclusive 0600 recovery-factor file; confirm the unlock password |

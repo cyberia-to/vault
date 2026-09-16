@@ -5,6 +5,11 @@ Build with `cargo build --release --bin vault --locked` and run
 `--home PATH` selects another owner-only directory. This local host currently
 supports macOS and Linux.
 
+The terminal help follows Mudra/Cyb's rainbow wordmark and aligned command groups.
+Use `vault <command> --help` for individual options. Piped help is plain text;
+`NO_COLOR=1` disables color and `TERM=dumb` uses the compact presentation.
+Command results remain JSON for scripts.
+
 ## Create and store
 
 `vault init --recovery-file PATH` asks for a new unlock password twice and

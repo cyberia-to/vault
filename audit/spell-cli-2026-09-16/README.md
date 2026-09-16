@@ -69,3 +69,15 @@ legacy secret store. No production-release or hardware-isolation claim follows.
 Companion changes: [Mudra #2](https://github.com/cyberia-to/mudra/pull/2),
 [Cyb #1391](https://github.com/cyberia-to/cyb/pull/1391),
 [soft3 #3](https://github.com/cyberia-to/soft3/pull/3).
+
+## Terminal presentation follow-up
+
+Help now uses the Mudra/Cyb ANSI Shadow wordmark and palette, aligned command
+groups, parser-derived command/flag descriptions and short examples. Subcommand
+help shares the palette. Result JSON and protected output paths are unchanged.
+
+The release binary passed all four CLI process tests and Clippy. A separate
+pseudo-terminal check verified all six wordmark colors, identical bare/`--help`/
+`help` output, lines fitting 80 columns, `NO_COLOR`, compact `TERM=dumb`, plain
+piped output, `help add`/`add --help` equivalence, nonzero invalid-command status,
+and absence of any host-directory creation during help. No custody data was used.

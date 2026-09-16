@@ -4,14 +4,14 @@ use std::path::PathBuf;
 #[derive(Parser)]
 #[command(version, about = "Local secret custody over Cybergraph / BBG")]
 pub struct Args {
-    /// Private host directory (default: ~/.cyber/vault).
-    #[arg(long, global = true)]
+    /// Vault directory (default: ~/.cyber/vault).
+    #[arg(long, global = true, value_name = "PATH")]
     pub home: Option<PathBuf>,
-    /// Read secret inputs as consecutive lines from a pipe, without echo.
+    /// Read secret inputs from a trusted pipe.
     #[arg(long, global = true)]
     pub secrets_stdin: bool,
-    /// Reuse the original 32-byte hex request ID when retrying a mutation/use.
-    #[arg(long, global = true)]
+    /// Reuse a request ID for an exact retry.
+    #[arg(long, global = true, value_name = "HEX")]
     pub request: Option<String>,
     #[command(subcommand)]
     pub command: Command,
@@ -19,26 +19,32 @@ pub struct Args {
 
 #[derive(Subcommand)]
 pub enum Command {
-    /// Create a vault; keep the recovery file separately from the host directory.
+    /// Create a vault and a separate recovery factor.
     Init {
+        /// New file outside the vault for its recovery factor.
         #[arg(long)]
         recovery_file: PathBuf,
     },
-    /// Show the retained local checkpoint without unlocking.
+    /// Show the local checkpoint without unlocking.
     Status,
-    /// List a page of entry metadata after unlocking.
+    /// Browse stored entries.
     List {
+        /// Continue after the last entry ID in the previous page.
         #[arg(long)]
         after: Option<String>,
+        /// Maximum entries in this page.
         #[arg(long, default_value_t = 100)]
         limit: usize,
     },
-    /// Import a secret through hidden prompts, or generate a domain root.
+    /// Import a secret or generate a domain root.
     Add {
+        /// Secret type to import or generate.
         #[arg(value_enum)]
         kind: Kind,
+        /// Name shown in the vault.
         #[arg(long)]
         label: String,
+        /// Service or purpose allowed to use this secret.
         #[arg(long)]
         scope: String,
         /// Optional 16-byte hex entry ID for exact retries.
@@ -60,52 +66,66 @@ pub enum Command {
         #[arg(long, value_enum, default_value_t = Algorithm::Sha1)]
         algorithm: Algorithm,
     },
-    /// Delete exactly this entry version.
+    /// Remove an entry at its exact version.
     Remove {
+        /// Entry ID returned by list.
         id: String,
+        /// Exact entry version returned by list.
         #[arg(long)]
         version: u64,
     },
-    /// Register a local ciphertext store in a declared failure domain.
+    /// Register an encrypted copy destination.
     ReplicaAdd {
+        /// Destination directory for encrypted history.
         #[arg(long)]
         path: PathBuf,
+        /// Operator-declared disk or device failure domain.
         #[arg(long)]
         failure_domain: String,
     },
-    /// Replicate and read back history to at least two registered destinations.
+    /// Copy and verify history on two or more replicas.
     Sync,
-    /// Reveal a permitted password/PIN on the controlling terminal.
+    /// Reveal a permitted password or PIN on the terminal.
     Show { id: String },
-    /// Generate an OTP on the controlling terminal after durable reservation.
+    /// Reserve and display a one-time code.
     Otp { id: String },
-    /// Consume one recovery code and deliver it on the controlling terminal.
+    /// Consume and display a recovery code.
     RecoveryCode { id: String },
-    /// Derive public neuron credentials; root material stays inside custody.
+    /// Derive public neuron credentials inside custody.
     DeriveNeuron {
+        /// Spell or domain-root entry ID.
         id: String,
+        /// BIP-32 path (default: m/44'/118'/0'/0/0).
         #[arg(long, conflicts_with = "domain")]
         path: Option<String>,
+        /// Derive from a domain root for this domain.
         #[arg(long)]
         domain: Option<String>,
+        /// Address prefix.
         #[arg(long, default_value = "bostrom")]
         hrp: String,
     },
-    /// Export a public checkpoint to a new file for independent retention.
+    /// Save a public checkpoint for independent retention.
     Checkpoint {
+        /// New file for the independently retained checkpoint.
         #[arg(long)]
         out: PathBuf,
     },
-    /// Verify recovery against an independent checkpoint and list metadata.
+    /// Verify a restore and browse entries read-only.
     Recover {
+        /// Directory containing the encrypted copy.
         #[arg(long)]
         database: PathBuf,
+        /// Independently retained checkpoint file.
         #[arg(long)]
         checkpoint: PathBuf,
+        /// Recovery factor file created by init.
         #[arg(long)]
         recovery_file: PathBuf,
+        /// Continue after the last entry ID in the previous page.
         #[arg(long)]
         after: Option<String>,
+        /// Maximum entries in this page.
         #[arg(long, default_value_t = 100)]
         limit: usize,
     },
