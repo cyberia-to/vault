@@ -1,7 +1,7 @@
 # Use the local Vault CLI
 
 Build with `cargo build --release --bin vault --locked` and run
-`./target/release/vault --help`. The default home is `~/.cyber/vault`;
+`./target/release/vault` to show the same help as `--help`. The default home is `~/.cyber/vault`;
 `--home PATH` selects another owner-only directory. This local host currently
 supports macOS and Linux.
 

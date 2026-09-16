@@ -88,7 +88,7 @@ Build the local operator CLI (macOS/Linux; compatible sibling stack checkouts):
 
 ```sh
 cargo build --release --bin vault --locked
-./target/release/vault --help
+./target/release/vault
 ./target/release/vault init --recovery-file /path/to/separate/recovery.factor
 ./target/release/vault add spell --label "Main neuron" --scope neuron
 ./target/release/vault add password --label "Mail" --scope mail --revealable

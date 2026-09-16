@@ -10,6 +10,8 @@ Ward integration.
 ## Commands
 
 `--home PATH` selects a private host directory (default `~/.cyber/vault`).
+Running `vault` without arguments prints the same help as `vault --help` to
+stdout, exits successfully and does not open or create a host directory.
 
 | Command | Contract |
 |---|---|
