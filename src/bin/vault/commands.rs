@@ -1,7 +1,7 @@
 use super::{
     Result,
     args::{Algorithm, Args, Command, Kind},
-    host::{Host, JournaledStore, ReplicaConfig, State},
+    host::{Host, JournaledStore, ReplicaConfig, State, replicas},
     io,
     owner::{Grant, Owner},
 };
@@ -12,8 +12,8 @@ use std::{
     sync::Arc,
 };
 use vault::{
-    Context, Derivation, Entry, GraphStore, NeuronKeyRef, Operation, OtpAlgorithm, Output, Replica,
-    RequestId, Revision, SecretInput, SecretRef, Vault, VaultId,
+    Context, Derivation, Entry, GraphStore, NeuronKeyRef, Operation, OtpAlgorithm, Output,
+    RequestId, Revision, SecretInput, SecretRef, SignRequest, Vault, VaultId,
 };
 use zeroize::Zeroizing;
 
@@ -182,6 +182,36 @@ pub fn run(args: Args) -> Result<()> {
             )
         }
         Command::Init { .. } | Command::Status | Command::Recover { .. } => unreachable!(),
+        Command::Sign {
+            id,
+            subject,
+            statement,
+            path,
+            domain,
+            hrp,
+        } => {
+            let derivation = match domain {
+                Some(domain) => Derivation::Domain { domain, hrp },
+                None => Derivation::Cosmos {
+                    path: path.unwrap_or_else(|| mudra::spell::COSMOS_PATH.into()),
+                    hrp,
+                },
+            };
+            use_secret(
+                &host,
+                &mut vault,
+                context,
+                request,
+                Operation::Sign(SignRequest {
+                    key: NeuronKeyRef {
+                        root: SecretRef(io::array(&id)?),
+                        derivation,
+                    },
+                    subject: io::array(&subject)?,
+                    statement: io::array(&statement)?,
+                }),
+            )
+        }
     }
 }
 
@@ -319,28 +349,6 @@ fn add_replica(host: &Host, path: &Path, failure_domain: String) -> Result<()> {
     host.save(state)
 }
 
-fn replicas(host: &Host) -> Result<Vec<Replica<GraphStore>>> {
-    let state = host.state()?;
-    if state.replicas.len() < 2 {
-        return Err(vault::Error::ReplicationRequired.into());
-    }
-    state
-        .replicas
-        .into_iter()
-        .map(|r| {
-            io::check_private(&r.path, true)?;
-            if r.path.canonicalize()? != r.path {
-                return Err("replica path changed".into());
-            }
-            Ok(Replica {
-                id: r.id,
-                failure_domain: r.failure_domain,
-                store: GraphStore::open(r.path)?,
-            })
-        })
-        .collect()
-}
-
 fn use_secret(
     host: &Host,
     vault: &mut Vault<Arc<JournaledStore>>,
@@ -349,7 +357,7 @@ fn use_secret(
     operation: Operation,
 ) -> Result<()> {
     // Validate destinations before consuming a one-time value.
-    let public = matches!(operation, Operation::DeriveNeuron(_));
+    let public = matches!(operation, Operation::DeriveNeuron(_) | Operation::Sign(_));
     let mut terminal = if public { None } else { Some(io::tty()?) };
     let replicas = replicas(host)?;
     let ward = Owner {
@@ -379,6 +387,9 @@ fn use_secret(
             }
             Output::Neuron { subject, public_key, address, .. } if public =>
                 Ok(json!({"neuron": hex::encode(subject), "public_key": hex::encode(public_key), "address": address})),
+            Output::Signature { request, evidence } if public =>
+                Ok(json!({"neuron": hex::encode(request.subject), "statement": hex::encode(request.statement),
+                    "profile": "NSIG1", "signature": hex::encode(evidence)})),
             _ => Err(vault::Error::Denied),
         }
     })?;

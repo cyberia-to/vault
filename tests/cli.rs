@@ -230,3 +230,89 @@ fn help_exposes_spell_without_secret_arguments() {
     assert!(!text.contains("--password"));
     assert!(!text.contains("--value"));
 }
+
+#[test]
+fn sign_and_embedded_signer_share_custody_retries_and_exclusive_lock() {
+    let c = Cli::new();
+    c.init();
+    let added = c.ok(
+        &["add", "spell", "--label", "test", "--scope", "neuron"],
+        &[UNLOCK, WORDS, ""],
+    );
+    let id = added["id"].as_str().unwrap();
+    let key = mudra::spell::cosmos_key(WORDS, "").unwrap();
+    let subject = mudra::claim::neuron_of(&mudra::cosmos::compressed(key.verifying_key()));
+    let neuron = hex::encode(subject);
+    let statement = hex::encode([8; 32]);
+    let request = hex::encode([7; 32]);
+    let args = [
+        "--request",
+        &request,
+        "sign",
+        id,
+        "--subject",
+        &neuron,
+        "--statement",
+        &statement,
+    ];
+    let denied = c.run(&args, &[UNLOCK]);
+    assert!(!denied.status.success());
+    assert!(denied.stdout.is_empty());
+    for (name, domain) in [("a", "a"), ("b", "b")] {
+        c.ok(
+            &[
+                "replica-add",
+                "--path",
+                &c.path(name),
+                "--failure-domain",
+                domain,
+            ],
+            &[UNLOCK],
+        );
+    }
+    let first = c.ok(&args, &[UNLOCK]);
+    let signature = hex::decode(first["result"]["signature"].as_str().unwrap()).unwrap();
+    assert!(mudra::neuron::verify_statement(
+        subject, [8; 32], &signature
+    ));
+    let retry = c.ok(&args, &[UNLOCK]);
+    assert_eq!(retry, first);
+    let changed = c.run(
+        &[
+            "--request",
+            &request,
+            "sign",
+            id,
+            "--subject",
+            &neuron,
+            "--statement",
+            &hex::encode([9; 32]),
+        ],
+        &[UNLOCK],
+    );
+    assert!(!changed.status.success());
+    assert!(changed.stdout.is_empty());
+
+    let reference = vault::NeuronKeyRef {
+        root: vault::SecretRef(hex::decode(id).unwrap().try_into().unwrap()),
+        derivation: vault::Derivation::Cosmos {
+            path: mudra::spell::COSMOS_PATH.into(),
+            hrp: "bostrom".into(),
+        },
+    };
+    let mut signer =
+        vault::local::Signer::open(&c.home, reference.clone(), UNLOCK.as_bytes()).unwrap();
+    assert_eq!(signer.subject(), subject);
+    assert!(vault::local::Signer::open(&c.home, reference.clone(), UNLOCK.as_bytes()).is_err());
+    assert_eq!(
+        signer.sign(vault::RequestId([7; 32]), [8; 32]).unwrap(),
+        signature
+    );
+    assert!(signer.sign(vault::RequestId([7; 32]), [9; 32]).is_err());
+    drop(signer);
+    let mut reopened = vault::local::Signer::open(&c.home, reference, UNLOCK.as_bytes()).unwrap();
+    assert_eq!(
+        reopened.sign(vault::RequestId([7; 32]), [8; 32]).unwrap(),
+        signature
+    );
+}

@@ -42,6 +42,9 @@ separate integration.
 - `vault recovery-code ID`: durably consume one code.
 - `vault derive-neuron ID --hrp bostrom`: return public credentials derived from a spell.
 - `vault derive-neuron ID --domain example.test --hrp bostrom`: use a domain root.
+- `vault sign ID --subject NEURON_HEX --statement COMMITMENT_HEX`: sign a native
+  action with the selected spell key; add `--domain example.test` for a domain root.
+  The result contains public NSIG1 evidence. Keep `--request HEX` for exact retries.
 - `vault remove ID --version N`: delete the exact version shown by `list`.
 
 Protected output is delivered after reservation and two verified copies. Secret

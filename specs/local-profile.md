@@ -25,8 +25,10 @@ single-writer-replicated-v1 deployment profile.
 
 `derive_neuron` returns the native `H(compressed_public_key)` subject, public key
 and existing compatibility address. A Cosmos address is not a foreign subject or
-a proof of external account control. Signing, foreign binding, passkeys and raw
-key import need separate typed adapters. There is no raw root/private-key getter.
+a proof of external account control. [`sign`](sign.md) signs native action
+statements under the existing Mudra NSIG1 profile through the same protected-use
+protocol. Foreign binding, passkeys and raw key import need separate typed
+adapters. There is no raw root/private-key getter.
 
 ## Encoding and limits
 

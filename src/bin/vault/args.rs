@@ -105,6 +105,26 @@ pub enum Command {
         #[arg(long, default_value = "bostrom")]
         hrp: String,
     },
+    /// Sign a native neuron action inside custody.
+    Sign {
+        /// Spell or domain-root entry ID.
+        id: String,
+        /// Expected native neuron ID (32-byte hex).
+        #[arg(long)]
+        subject: String,
+        /// Canonical action commitment (32-byte hex), authorized by this operator.
+        #[arg(long)]
+        statement: String,
+        /// BIP-32 path (default: m/44'/118'/0'/0/0).
+        #[arg(long, conflicts_with = "domain")]
+        path: Option<String>,
+        /// Derive from a domain root for this domain.
+        #[arg(long)]
+        domain: Option<String>,
+        /// Address prefix; the NSIG1 signature domain stays fixed.
+        #[arg(long, default_value = "bostrom")]
+        hrp: String,
+    },
     /// Save a public checkpoint for independent retention.
     Checkpoint {
         /// New file for the independently retained checkpoint.

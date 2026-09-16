@@ -109,12 +109,24 @@ Register two ciphertext destinations before protected use:
 ./target/release/vault checkpoint --out /path/to/separate/checkpoint.json
 ```
 
-`show ID`, `otp ID`, `recovery-code ID` and `derive-neuron ID` reserve their
+`show ID`, `otp ID`, `recovery-code ID`, `derive-neuron ID` and `sign ID` reserve their
 operation and verify both copies before delivering a result. Keep the printed
 request ID when retrying an interrupted use. This is local operator custody;
 the declared disk names do not establish physical independence by themselves.
 
 [CLI guide](docs/cli.md) · [CLI contract](specs/cli.md)
+
+Sign without exporting the key:
+
+```sh
+./target/release/vault sign ENTRY_ID --subject NEURON_HEX --statement ACTION_COMMITMENT_HEX
+```
+
+The existing Mudra NSIG1 profile preserves native IDs and signature bytes.
+Trusted local hosts can embed `local::Signer` with the `local-host` feature.
+Neuron selects the same custody with `--vault-home PATH --vault-root ENTRY_ID`
+and optional `--vault-domain DOMAIN`. Its action grant remains checked while
+Vault reserves, replicates and releases each signature. See the [sign contract](specs/sign.md).
 
 With compatible sibling stack checkouts, run the synthetic recovery demonstration:
 

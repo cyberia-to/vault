@@ -16,6 +16,14 @@ pub struct NeuronKeyRef {
     pub derivation: Derivation,
 }
 
+/// Exact native NSIG1 operation; the host authorizes the action behind its digest.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct SignRequest {
+    pub key: NeuronKeyRef,
+    pub subject: [u8; 32],
+    pub statement: [u8; 32],
+}
+
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub enum Operation {
     Reveal {
@@ -33,6 +41,7 @@ pub enum Operation {
         secret: SecretRef,
     },
     DeriveNeuron(NeuronKeyRef),
+    Sign(SignRequest),
 }
 impl Operation {
     pub fn secret(&self) -> SecretRef {
@@ -42,6 +51,7 @@ impl Operation {
             | Self::Otp { secret }
             | Self::RecoveryCode { secret } => *secret,
             Self::DeriveNeuron(k) => k.root,
+            Self::Sign(request) => request.key.root,
         }
     }
     pub(crate) fn encode(&self) -> Result<Zeroizing<Vec<u8>>> {
@@ -70,8 +80,13 @@ impl Operation {
                 e.byte(4);
                 e.fixed(&secret.0);
             }
-            Self::DeriveNeuron(k) => {
-                e.byte(5);
+            Self::DeriveNeuron(_) | Self::Sign(_) => {
+                let (tag, k) = match self {
+                    Self::DeriveNeuron(k) => (5, k),
+                    Self::Sign(request) => (6, &request.key),
+                    _ => unreachable!(),
+                };
+                e.byte(tag);
                 e.fixed(&k.root.0);
                 match &k.derivation {
                     Derivation::Cosmos { path, hrp } => {
@@ -92,6 +107,10 @@ impl Operation {
                         e.text(hrp)?;
                     }
                 }
+                if let Self::Sign(request) = self {
+                    e.fixed(&request.subject);
+                    e.fixed(&request.statement);
+                }
             }
         }
         Ok(e.0)
@@ -111,20 +130,31 @@ impl Operation {
             },
             3 => Self::Otp { secret },
             4 => Self::RecoveryCode { secret },
-            5 => Self::DeriveNeuron(NeuronKeyRef {
-                root: secret,
-                derivation: match d.byte()? {
-                    1 => Derivation::Cosmos {
-                        path: d.text(256)?,
-                        hrp: d.text(83)?,
+            5 | 6 => {
+                let key = NeuronKeyRef {
+                    root: secret,
+                    derivation: match d.byte()? {
+                        1 => Derivation::Cosmos {
+                            path: d.text(256)?,
+                            hrp: d.text(83)?,
+                        },
+                        2 => Derivation::Domain {
+                            domain: d.text(253)?,
+                            hrp: d.text(83)?,
+                        },
+                        _ => return Err(Error::Unsupported),
                     },
-                    2 => Derivation::Domain {
-                        domain: d.text(253)?,
-                        hrp: d.text(83)?,
-                    },
-                    _ => return Err(Error::Unsupported),
-                },
-            }),
+                };
+                if tag == 5 {
+                    Self::DeriveNeuron(key)
+                } else {
+                    Self::Sign(SignRequest {
+                        key,
+                        subject: d.array()?,
+                        statement: d.array()?,
+                    })
+                }
+            }
             _ => return Err(Error::Unsupported),
         };
         d.finish()?;
@@ -205,6 +235,10 @@ pub enum Output {
         public_key: [u8; 33],
         address: String,
     },
+    Signature {
+        request: SignRequest,
+        evidence: Vec<u8>,
+    },
 }
 impl fmt::Debug for Output {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
@@ -232,6 +266,14 @@ impl Output {
                 e.fixed(public_key);
                 e.text(address)?;
             }
+            Self::Signature { request, evidence } => {
+                if !mudra::neuron::verify_statement(request.subject, request.statement, evidence) {
+                    return Err(Error::Corrupt);
+                }
+                e.byte(3);
+                e.bytes(&Operation::Sign(request.clone()).encode()?)?;
+                e.fixed(evidence);
+            }
         }
         Ok(e.0)
     }
@@ -251,9 +293,77 @@ impl Output {
                     address: d.text(256)?,
                 }
             }
+            3 => {
+                let Operation::Sign(request) = Operation::decode(d.bytes(1024)?)? else {
+                    return Err(Error::Corrupt);
+                };
+                let evidence = d.array::<102>()?.to_vec();
+                if !mudra::neuron::verify_statement(request.subject, request.statement, &evidence) {
+                    return Err(Error::Corrupt);
+                }
+                Self::Signature { request, evidence }
+            }
             _ => return Err(Error::Corrupt),
         };
         d.finish()?;
         Ok((created_at, output))
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    #[test]
+    fn sign_wire_has_fixed_tags_and_rejects_truncation_trailing_and_changed_evidence() {
+        let key = mudra::SigningKey::from_bytes((&[7; 32]).into()).unwrap();
+        let subject = mudra::claim::neuron_of(&mudra::cosmos::compressed(key.verifying_key()));
+        let request = SignRequest {
+            key: NeuronKeyRef {
+                root: SecretRef([1; 16]),
+                derivation: Derivation::Domain {
+                    domain: "test".into(),
+                    hrp: "x".into(),
+                },
+            },
+            subject,
+            statement: [3; 32],
+        };
+        let op = Operation::Sign(request.clone());
+        let mut expected = vec![6];
+        expected.extend([1; 16]);
+        expected.push(2);
+        expected.extend(4u32.to_le_bytes());
+        expected.extend(b"test");
+        expected.extend(1u32.to_le_bytes());
+        expected.extend(b"x");
+        expected.extend(subject);
+        expected.extend([3; 32]);
+        assert_eq!(op.encode().unwrap().as_slice(), expected);
+        assert_eq!(Operation::decode(&expected).unwrap(), op);
+        for n in 0..expected.len() {
+            assert!(Operation::decode(&expected[..n]).is_err());
+        }
+        expected.push(0);
+        assert!(Operation::decode(&expected).is_err());
+        let output = Output::Signature {
+            evidence: mudra::neuron::sign(&key, subject, [3; 32]).unwrap(),
+            request,
+        };
+        let bytes = output.encode(59).unwrap();
+        assert_eq!(&bytes[..8], &59u64.to_le_bytes());
+        assert_eq!(bytes[8], 3);
+        assert!(matches!(
+            Output::decode(&bytes),
+            Ok((59, Output::Signature { .. }))
+        ));
+        for n in 0..bytes.len() {
+            assert!(Output::decode(&bytes[..n]).is_err());
+        }
+        let mut changed = bytes.to_vec();
+        *changed.last_mut().unwrap() ^= 1;
+        assert!(Output::decode(&changed).is_err());
+        let mut trailing = bytes.to_vec();
+        trailing.push(0);
+        assert!(Output::decode(&trailing).is_err());
     }
 }

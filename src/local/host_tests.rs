@@ -1,6 +1,6 @@
 use super::*;
-use crate::owner::{Grant, Owner};
-use vault::{Entry, SecretInput, SecretRef, Vault};
+use crate::local::owner::{Grant, Owner};
+use crate::{Entry, SecretInput, SecretRef, Vault};
 use zeroize::Zeroizing;
 
 fn create(host: &Host) -> Vault<Arc<JournaledStore>> {

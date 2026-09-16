@@ -5,6 +5,16 @@ use crate::{
 };
 
 impl<S: CipherStore> Vault<S> {
+    /// Reserve a native signature. Release requires copies and fresh authorization.
+    pub fn sign<W: Ward>(
+        &mut self,
+        context: Context,
+        request: RequestId,
+        signing: crate::SignRequest,
+        ward: &W,
+    ) -> Result<PendingUse> {
+        self.prepare_use(context, request, Operation::Sign(signing), ward)
+    }
     pub fn derive_neuron<W: Ward>(
         &mut self,
         context: Context,

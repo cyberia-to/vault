@@ -1,4 +1,4 @@
-use vault::{
+use crate::{
     Context, EntryInfo, Error, Intent, IntentKind, Operation, RequestId, Result, SecretRef,
     VaultId, Ward,
 };
@@ -73,7 +73,7 @@ impl Ward for Owner {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use vault::{ActorId, PolicyRef};
+    use crate::{ActorId, PolicyRef};
 
     #[test]
     fn local_grant_rejects_another_actor_request_and_operation() {

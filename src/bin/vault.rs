@@ -6,16 +6,13 @@ mod args;
 mod commands;
 #[path = "vault/help.rs"]
 mod help;
-#[path = "vault/host.rs"]
-mod host;
-#[path = "vault/io.rs"]
-mod io;
-#[path = "vault/owner.rs"]
-mod owner;
+use vault::local::host;
+use vault::local::io;
+use vault::local::owner;
 
 use clap::{CommandFactory, FromArgMatches};
 
-type Result<T> = std::result::Result<T, Box<dyn std::error::Error>>;
+type Result<T> = std::result::Result<T, Box<dyn std::error::Error + Send + Sync>>;
 
 fn main() {
     let mut argv: Vec<_> = std::env::args_os().collect();

@@ -12,7 +12,8 @@ name = "vault"
 [features]
 default = ["graph-store", "cli"]
 graph-store = ["dep:cybergraph"]
-cli = ["graph-store", "dep:clap", "dep:serde", "dep:serde_json", "dep:rpassword", "dep:tempfile", "dep:rustix", "dep:hex", "dep:data-encoding"]
+local-host = ["graph-store", "dep:serde", "dep:serde_json", "dep:rpassword", "dep:tempfile", "dep:rustix", "dep:hex"]
+cli = ["local-host", "dep:clap", "dep:data-encoding"]
 
 [dependencies]
 argon2 = { version = "0.5.3", features = ["zeroize"] }

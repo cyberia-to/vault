@@ -1,13 +1,13 @@
 use super::{Result, io};
+use crate::{
+    ActorId, CipherStore, Context, Error, GraphStore, PolicyRef, Replica, RequestId, Revision,
+    StoredRevision, VaultId,
+};
 use serde::{Deserialize, Serialize};
 use std::{
     fs::File,
     path::{Path, PathBuf},
     sync::{Arc, Mutex},
-};
-use vault::{
-    ActorId, CipherStore, Context, Error, GraphStore, PolicyRef, RequestId, Revision,
-    StoredRevision, VaultId,
 };
 
 #[cfg(test)]
@@ -201,10 +201,10 @@ pub struct JournaledStore {
     file: PathBuf,
 }
 impl CipherStore for JournaledStore {
-    fn head(&self, id: VaultId) -> vault::Result<Option<Revision>> {
+    fn head(&self, id: VaultId) -> crate::Result<Option<Revision>> {
         self.graph.head(id)
     }
-    fn read(&self, r: Revision) -> vault::Result<StoredRevision> {
+    fn read(&self, r: Revision) -> crate::Result<StoredRevision> {
         self.graph.read(r)
     }
     fn history_page(
@@ -212,10 +212,10 @@ impl CipherStore for JournaledStore {
         id: VaultId,
         after: Option<u64>,
         limit: usize,
-    ) -> vault::Result<Vec<Revision>> {
+    ) -> crate::Result<Vec<Revision>> {
         self.graph.history_page(id, after, limit)
     }
-    fn resolve(&self, id: VaultId, request: RequestId) -> vault::Result<Option<Revision>> {
+    fn resolve(&self, id: VaultId, request: RequestId) -> crate::Result<Option<Revision>> {
         self.graph.resolve(id, request)
     }
     fn append(
@@ -224,7 +224,7 @@ impl CipherStore for JournaledStore {
         request: RequestId,
         previous: Option<Revision>,
         bytes: Vec<u8>,
-    ) -> vault::Result<Revision> {
+    ) -> crate::Result<Revision> {
         let mut state = self.state.lock().map_err(|_| Error::Storage)?;
         if state.vault != id.0
             || state.anchor.map(Into::into) != previous
@@ -254,4 +254,26 @@ impl CipherStore for JournaledStore {
         *state = next;
         self.graph.append(id, request, previous, bytes)
     }
+}
+
+pub fn replicas(host: &Host) -> Result<Vec<Replica<GraphStore>>> {
+    let state = host.state()?;
+    if state.replicas.len() < 2 {
+        return Err(Error::ReplicationRequired.into());
+    }
+    state
+        .replicas
+        .into_iter()
+        .map(|r| {
+            io::check_private(&r.path, true)?;
+            if r.path.canonicalize()? != r.path {
+                return Err("replica path changed".into());
+            }
+            Ok(Replica {
+                id: r.id,
+                failure_domain: r.failure_domain,
+                store: GraphStore::open(r.path)?,
+            })
+        })
+        .collect()
 }

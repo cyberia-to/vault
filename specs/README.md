@@ -19,6 +19,7 @@ unqualified cryptographic parameters.
 | [Architecture](architecture.md) | Owners, dependencies, trust boundaries and initial deployment profile |
 | [Secrets](secrets.md) | Record types, allowed uses, disclosure and `derive_neuron` |
 | [Authorization](authorization.md) | Ward decisions, protected operations, retries and revocation |
+| [Signing](sign.md) | Native `sign`, exact NSIG1 compatibility and durable signature release |
 | [Storage](storage.md) | Sealed records, complete revisions and durable acknowledgement |
 | [Synchronization](synchronization.md) | Replicas, device roles, writer epochs, conflicts and retention |
 | [Recovery](recovery.md) | Independent recovery material, freshness and loss scenarios |

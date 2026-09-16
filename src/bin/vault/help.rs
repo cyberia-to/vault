@@ -85,7 +85,7 @@ fn style(command: Command, theme: &Theme) -> Command {
 
 fn category(name: &str) -> &str {
     match name {
-        "show" | "otp" | "recovery-code" | "derive-neuron" => "use",
+        "show" | "otp" | "recovery-code" | "derive-neuron" | "sign" => "use",
         "replica-add" | "sync" | "checkpoint" | "recover" => "recovery",
         _ => "custody",
     }

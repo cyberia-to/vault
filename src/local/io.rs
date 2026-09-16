@@ -14,7 +14,7 @@ pub fn secret(prompt: &str, piped: bool) -> Result<Zeroizing<String>> {
         let mut bytes = Zeroizing::new(Vec::new());
         let n = std::io::stdin()
             .lock()
-            .take((vault::MAX_SECRET_BYTES + 2) as u64)
+            .take((crate::MAX_SECRET_BYTES + 2) as u64)
             .read_until(b'\n', &mut bytes)?;
         if n == 0 || bytes.last() != Some(&b'\n') {
             return Err("secret input must be a bounded newline-terminated line".into());
@@ -33,7 +33,7 @@ pub fn secret(prompt: &str, piped: bool) -> Result<Zeroizing<String>> {
             |_| "hidden terminal input unavailable; a trusted pipe may use --secrets-stdin",
         )?)
     };
-    if value.len() > vault::MAX_SECRET_BYTES {
+    if value.len() > crate::MAX_SECRET_BYTES {
         return Err("secret exceeds the per-value byte limit".into());
     }
     Ok(value)

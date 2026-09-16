@@ -32,6 +32,7 @@ the compact plain presentation. Command results retain their JSON format.
 | `show ID` | Reveal a revealable password/PIN to the controlling terminal |
 | `otp ID` / `recovery-code ID` | Reserve use durably, replicate, then deliver to the controlling terminal |
 | `derive-neuron ID [--path PATH / --domain DOMAIN]` | Derive inside custody and emit public credentials after replication |
+| `sign ID --subject HEX --statement HEX [--path PATH / --domain DOMAIN]` | Sign an operator-authorized native action commitment; emit NSIG1 evidence after replication |
 | `checkpoint --out PATH` | Export the authenticated revision and public host context; never a secret |
 | `recover --database PATH --checkpoint PATH --recovery-file PATH` | Authenticate exact retained history and list a page in read-only recovery mode |
 
@@ -41,8 +42,15 @@ recovery codes, spells and unlock passwords never enter arguments or environment
 variables. Default input uses hidden terminal prompts. Explicit `--secrets-stdin`
 reads one line per prompt from a pipe for host automation; redirected terminal
 input is otherwise not accepted. OTP enrollment accepts unpadded base32.
-Protected output goes only to the controlling terminal, never redirected stdout;
+Secret output goes only to the controlling terminal, never redirected stdout;
 spells and domain roots have no reveal/export command. Ordinary results are JSON.
+
+`derive-neuron` credentials and `sign` evidence are public JSON results. Signing
+still requires current authorization and verified copies. The `local-host` library
+feature exposes `local::Signer` for trusted embedding. It shares the CLI's exact
+lock, checkpoint journal, secret-input surface and replica checks. Its caller must
+interpret and authorize the action; it is not a permission grant for arbitrary
+programs. Neuron's local authority holds its grant throughout the signing call.
 
 ## Durability and retries
 
