@@ -1,5 +1,5 @@
 use super::*;
-use crate::state::Receipt;
+use crate::state::{Change, Receipt};
 
 impl<S: CipherStore> Vault<S> {
     pub fn put<W: Ward>(
@@ -46,26 +46,24 @@ impl<S: CipherStore> Vault<S> {
             match (current, expected_version) {
                 (None, None) if !self.state()?.deleted.contains(&id) => {}
                 (Some(old), Some(v))
-                    if old.info.version == v
-                        && old.info.kind == entry.info.kind
-                        && old.info.policy == context.policy => {}
+                    if old.version == v
+                        && old.kind == entry.info.kind
+                        && old.policy == context.policy => {}
                 _ => return Err(Error::Conflict),
             }
-            if current.is_none() && self.state()?.entries.len() >= MAX_ENTRIES {
-                return Err(Error::Limit);
-            }
-            let mut state = self.state()?.duplicate()?;
             let mut entry = entry;
             entry.info.version = self.head.index.checked_add(1).ok_or(Error::Limit)?;
-            state.entries.insert(id, entry);
-            state.request = request;
-            state.fingerprint = binding;
-            state.receipt = Receipt {
-                context,
-                secret: None,
-                entry_version: 0,
-                operation: e.0,
-                output: Zeroizing::new(vec![]),
+            let state = Record {
+                request,
+                fingerprint: binding,
+                change: Change::Put(Box::new(entry)),
+                receipt: Receipt {
+                    context,
+                    secret: None,
+                    entry_version: 0,
+                    operation: e.0,
+                    output: Zeroizing::new(vec![]),
+                },
             };
             self.commit(state)
         })
@@ -100,23 +98,23 @@ impl<S: CipherStore> Vault<S> {
                 return Ok(head);
             }
             let entry = self.state()?.entries.get(&secret).ok_or(Error::NotFound)?;
-            if entry.info.policy != context.policy {
+            if entry.policy != context.policy {
                 return Err(Error::Denied);
             }
-            if entry.info.version != expected_version {
+            if entry.version != expected_version {
                 return Err(Error::Conflict);
             }
-            let mut state = self.state()?.duplicate()?;
-            state.entries.remove(&secret);
-            state.deleted.insert(secret);
-            state.request = request;
-            state.fingerprint = binding;
-            state.receipt = Receipt {
-                context,
-                secret: None,
-                entry_version: 0,
-                operation: e.0,
-                output: Zeroizing::new(vec![]),
+            let state = Record {
+                request,
+                fingerprint: binding,
+                change: Change::Delete(secret),
+                receipt: Receipt {
+                    context,
+                    secret: None,
+                    entry_version: 0,
+                    operation: e.0,
+                    output: Zeroizing::new(vec![]),
+                },
             };
             self.commit(state)
         })

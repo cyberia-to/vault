@@ -65,10 +65,19 @@ impl CipherStore for FaultStore {
         }
         Ok(value)
     }
-    fn history(&self, id: VaultId) -> Result<Vec<Revision>> {
-        let mut values = self.graph.history(id)?;
+    fn history_page(&self, id: VaultId, after: Option<u64>, limit: usize) -> Result<Vec<Revision>> {
+        let mut values = self.graph.history_page(id, after, limit)?;
         if self.fault.load(Ordering::SeqCst) == 4 {
             values.pop();
+        }
+        if after == Some(4095) {
+            match self.fault.load(Ordering::SeqCst) {
+                6 if !values.is_empty() => {
+                    values.remove(0);
+                }
+                7 => values.clear(),
+                _ => {}
+            }
         }
         Ok(values)
     }

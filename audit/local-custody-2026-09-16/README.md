@@ -1,5 +1,9 @@
 # Local custody implementation — 2026-09-16
 
+Historical evidence for `3135f23`. The subsequent
+[capacity change](../unbounded-history-2026-09-16/README.md) replaces its full
+snapshots and count caps; the remaining deployment limitations still apply.
+
 Vault now has a working Rust library for the bounded
 [local-custody-v1 profile](../../specs/local-profile.md). It stores encrypted typed
 secrets in the existing Cybergraph/BBG application path, reserves protected uses

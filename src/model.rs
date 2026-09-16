@@ -1,9 +1,10 @@
 use std::fmt;
 
-pub const MAX_ENTRIES: usize = 128;
 pub const MAX_SECRET_BYTES: usize = 16 * 1024;
-pub const MAX_SNAPSHOT_BYTES: usize = 4 * 1024 * 1024;
-pub const MAX_REVISIONS: u64 = 4096;
+pub const MAX_PACKET_BYTES: usize = 4 * 1024 * 1024;
+/// Maximum rows per read, not a limit on the total history/catalog.
+pub const MAX_PAGE_SIZE: usize = 4096;
+pub const HISTORY_PAGE_SIZE: usize = 256;
 
 macro_rules! id {
     ($name:ident, $len:expr) => {

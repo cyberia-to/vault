@@ -38,6 +38,10 @@ default Fjall store. Backend choice remains BBG's responsibility.
 `CipherStore` carries only ciphertext. Its `append` implementation must enforce
 durable atomic compare-and-swap, exact request deduplication and uncertainty
 reporting. Supplying another implementation inherits those obligations.
+It now supplies `history_page(vault, after, limit)`, with strictly ascending rows
+after the cursor. Recovery and copying continue until the exact selected anchor
+and end-of-history check; a short page is not the end. `history()` remains an
+explicit convenience collector and is not used by recovery or replication.
 
 The [Cybergraph boundary check](../audit/cybergraph-sync-boundary-2026-09-16/README.md)
 demonstrates raw graph read/copy/reopen compatibility. `Vault::replicate` remains
@@ -75,8 +79,11 @@ production Ward. Test adapters exist only in tests and the synthetic example.
    to the recorded approved destination/surface. Secret outputs use zeroizing
    buffers; any copies made by the host become its custody responsibility.
 
-Metadata inspection also requires Ward authorization. `lock` drops the library's
-keys and decrypted state; encrypted copy operations do not require unlocking.
+Metadata inspection also requires Ward authorization. Use `inspect_page` for
+bounded responses, continuing after the last returned SecretRef until the page
+is empty. `inspect` explicitly collects the complete visible catalog. `lock`
+drops the library's keys and in-memory catalog index; encrypted copy operations
+do not require unlocking. Entry payloads are decrypted on demand.
 Neither root seeds nor derived private keys have an export/getter operation.
 
 ## Reopen, retry and recover
@@ -107,9 +114,20 @@ are the next deployment layer, not hidden defaults in this API.
 
 ## Capacity and qualification
 
-The initial profile retains full encrypted snapshots: at most 128 entries,
-16 KiB per secret, 4 MiB per packet and 4096 revisions. There is no compaction,
-factor rotation, authenticated network receipt, retention lease or distributed
-fencing yet. Root custody inside this library is an API boundary, not protection
-against a compromised host process. See the [evidence report](../audit/local-custody-2026-09-16/README.md)
-before making deployment claims.
+There is no configured total-entry, tombstone or lifetime-revision limit. Each
+new revision stores one encrypted change and its receipt; it never rewrites the
+complete catalog. Read/decoder budgets still bound individual packets (4 MiB),
+secret values (16 KiB) and page responses. The history position uses the existing
+u64 format with checked overflow. Practical capacity depends on storage and RAM.
+
+The in-memory current-entry/tombstone index grows with IDs, not secret payload
+bytes. Opening still replays history, and copying verifies retained history in
+pages. There is no checkpoint/compaction acceleration yet. Existing v1 snapshots
+remain readable and may append v2 changes without rewriting original ciphertext
+or receipts; old clients must upgrade before reading/writing the v2 tail.
+
+There is no factor rotation, authenticated network receipt, retention lease or
+distributed fencing yet. Root custody inside this library is an API boundary,
+not protection against a compromised host process. See the
+[capacity/recovery evidence](../audit/unbounded-history-2026-09-16/README.md) and
+[initial qualification limits](../audit/local-custody-2026-09-16/README.md).

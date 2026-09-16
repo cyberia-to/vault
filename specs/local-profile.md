@@ -1,9 +1,9 @@
 ---
 title: local custody implementation profile
 status: local-library-profile
-version: 1
+version: 2
 ---
-# local-custody-v1
+# local-custody-v2
 
 This bounded first implementation supplies the custody/storage library and a
 Cybergraph adapter. It runs inside a trusted host; it does not yet supply the
@@ -30,19 +30,38 @@ key import need separate typed adapters. There is no raw root/private-key getter
 
 ## Encoding and limits
 
-One committed Blob contains an encrypted complete catalog and the current
-operation receipt. Its application namespace is a random 32-byte VaultId.
+One committed Blob contains one encrypted record change and its operation
+receipt. Its application namespace is a random 32-byte VaultId. There is no
+configured ceiling on the total number of live entries, tombstones or revisions.
+The existing u64 history position remains the wire representation, with checked
+overflow. Available storage and host resources determine practical capacity.
 Application heads and content IDs use existing Cybergraph/Hemera codecs.
 Integers are little endian; variable fields have u32 byte/count lengths;
 unknown versions, duplicate/out-of-order IDs and trailing bytes reject.
 
-The catalog holds at most 128 entries, each at most 16 KiB, with bounded
-256-byte labels, 1024-byte scopes and 64 recovery codes. A packet is bounded by
-4 MiB; plaintext reserves 1024 bytes within that limit for the envelope.
-Canonical BTreeMap order defines entry encoding. History
-is append-only with a 4096-revision initial profile limit; this version does
-not compact. Full snapshots trade bounded simplicity for O(catalog × revisions)
-retained space. No scalability claim beyond these limits is made.
+Individual secret values are at most 16 KiB, with bounded 256-byte labels,
+1024-byte scopes and 64 recovery codes per enrollment. A packet is bounded by
+4 MiB; plaintext reserves 1024 bytes within that limit for the envelope. These
+are per-operation decoding budgets, never total catalog/history limits.
+
+The outer authenticated `CVLT1` packet encoding and key-wrapping bytes stay
+unchanged. New plaintext records use `VSTATE2`: the existing request/fingerprint/receipt
+fields, then one change tag: genesis (0), put/replace (1), delete (2), protected
+use/reservation (3). Put/use carries one canonical Entry; delete carries one
+SecretRef. Genesis is valid only at index zero. Entry versions advance on
+replacement, while use preserves the version and durably updates its use state.
+Each commit's predecessor authenticates the complete ordered change history.
+
+Reopen streams history pages and reconstructs an index of current encrypted-entry
+locations and tombstones; it does not retain all plaintext secrets or all history
+positions. A current entry is decrypted on demand. Mutation writes only the
+affected entry and receipt. Retained bytes grow with actual committed changes,
+not catalog size multiplied by every operation. No compaction is introduced.
+
+Existing `VSTATE1` snapshots remain readable with their original ciphertext,
+requests and identities. A legacy history may append v2 changes without rewriting
+its prefix. A v1 snapshot after the first v2 record is rejected as a downgrade.
+Older clients cannot read v2 payloads and must be upgraded before using that tail.
 
 The envelope exposes VaultId, random RequestId, revision/predecessor, wrapping
 descriptor and ciphertext length. Hosts MUST use independent random request IDs,
@@ -50,8 +69,8 @@ never secret-derived or identifying values. Record labels, scopes, types and
 receipts are encrypted. This profile does not hide access timing, total size or
 revision linkage from a store/transport observer.
 
-Only encrypted snapshots are content addressed. A keyed request fingerprint
-inside each snapshot binds the full operation, actor, policy and input secret;
+Only encrypted packets are content addressed. A keyed request fingerprint
+inside each packet binds the full operation, actor, policy and input secret;
 it never exposes a dictionary-testable password hash. Application receipts map
 request IDs to the original revision so exact retries survive later writes.
 Historical result release still checks current authority and entry version.
@@ -98,7 +117,9 @@ Ciphertext transfer works without unlocking; replayed/divergent prefixes reject.
 The local helper iterates application history itself; it is a development
 implementation, not the shared live synchronization adapter required by the
 [deployment contract](synchronization.md#shared-graph-boundary). Each validation
-walk reads the complete retained history, even when only new packets are copied.
+walk reads the complete retained history in bounded pages, even when only new
+packets are copied. Page size limits one read, never the Vault's lifetime.
+Missing, repeated, reordered or extra history rows reject.
 
 Open and restore require an independently supplied exact Revision anchor and
 verify the complete contiguous history to it. An older or newer selected store

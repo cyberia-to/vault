@@ -1,10 +1,12 @@
+#[cfg(all(test, feature = "graph-store"))]
+mod compatibility_tests;
 mod mutations;
 mod uses;
 
 use crate::{
     codec::Encoder,
     crypto::{Header, Keys, Packet},
-    state::State,
+    state::{Record, catalog::Catalog},
     store::{checked, identity},
     *,
 };
@@ -24,7 +26,7 @@ pub struct Vault<S: CipherStore> {
     store: S,
     header: Header,
     keys: Option<Keys>,
-    state: Option<State>,
+    state: Option<Catalog>,
     head: Revision,
     mode: AccessMode,
     pending_commit: Option<Revision>,
@@ -51,8 +53,8 @@ impl<S: CipherStore> Vault<S> {
                 return Err(Error::AlreadyExists);
             }
             let (header, keys) = Header::create(id, password, recovery)?;
-            let state = State::empty(request, context);
-            let packet = Packet::seal(header.clone(), &keys, request, None, state.encode()?)?;
+            let record = Record::genesis(request, context);
+            let packet = Packet::seal(header.clone(), &keys, request, None, record.encode()?)?;
             let bytes = packet.encode()?;
             let expected = Revision {
                 index: 0,
@@ -62,6 +64,8 @@ impl<S: CipherStore> Vault<S> {
             if head != expected {
                 return Err(Error::CommitUnknown);
             }
+            let mut state = Catalog::default();
+            state.apply(&record, head)?;
             Ok(Self {
                 store,
                 header,
@@ -106,32 +110,22 @@ impl<S: CipherStore> Vault<S> {
         keys: Keys,
         mode: AccessMode,
     ) -> Result<Self> {
-        let history = crate::replication::chain(&store, id, anchor)?;
-        let mut state = None;
-        for head in history {
-            let packet = load_packet(&store, head)?;
+        let mut catalog = Catalog::default();
+        crate::history::walk(&store, id, anchor, |head, packet| {
             if packet.header != header {
                 return Err(Error::Corrupt);
             }
-            let decoded = State::decode(&packet.open(&keys)?)?;
-            if decoded.request != packet.request
-                || decoded
-                    .entries
-                    .values()
-                    .any(|e| e.info.version == 0 || e.info.version > head.index)
-            {
+            let record = Record::decode(&packet.open(&keys)?)?;
+            if record.request != packet.request {
                 return Err(Error::Corrupt);
             }
-            if store.resolve(id, decoded.request)? != Some(head) {
-                return Err(Error::Corrupt);
-            }
-            state = Some(decoded);
-        }
+            catalog.apply(&record, head)
+        })?;
         Ok(Self {
             store,
             header,
             keys: Some(keys),
-            state,
+            state: Some(catalog),
             head: anchor,
             mode,
             pending_commit: None,
@@ -162,7 +156,31 @@ impl<S: CipherStore> Vault<S> {
         self.mode = AccessMode::Locked;
     }
 
+    /// Convenience collector. Use inspect_page to bound response memory.
     pub fn inspect<W: Ward>(&self, context: Context, ward: &W) -> Result<Vec<EntryInfo>> {
+        self.inspect_inner(context, None, None, ward)
+    }
+    /// Entries after the opaque ID, ordered by ID and filtered by policy. Continue
+    /// after the last returned ID; an empty page means no matching entries remain.
+    pub fn inspect_page<W: Ward>(
+        &self,
+        context: Context,
+        after: Option<SecretRef>,
+        limit: usize,
+        ward: &W,
+    ) -> Result<Vec<EntryInfo>> {
+        if limit == 0 || limit > MAX_PAGE_SIZE {
+            return Err(Error::Limit);
+        }
+        self.inspect_inner(context, after, Some(limit), ward)
+    }
+    fn inspect_inner<W: Ward>(
+        &self,
+        context: Context,
+        after: Option<SecretRef>,
+        limit: Option<usize>,
+        ward: &W,
+    ) -> Result<Vec<EntryInfo>> {
         self.ready(false)?;
         let intent = Intent {
             vault: self.id(),
@@ -173,13 +191,21 @@ impl<S: CipherStore> Vault<S> {
         };
         ward.with_authorization(&intent, |_| {
             self.current()?;
-            Ok(self
+            let mut result = Vec::new();
+            let lower = after.map_or(std::ops::Bound::Unbounded, std::ops::Bound::Excluded);
+            for (id, loc) in self
                 .state()?
                 .entries
-                .values()
-                .filter(|e| e.info.policy == context.policy)
-                .map(|e| e.info.clone())
-                .collect())
+                .range((lower, std::ops::Bound::Unbounded))
+            {
+                if loc.policy == context.policy {
+                    result.push(self.read_entry(*id)?.info);
+                    if limit == Some(result.len()) {
+                        break;
+                    }
+                }
+            }
+            Ok(result)
         })
     }
     pub fn replicate<T: CipherStore>(&self, replicas: &[Replica<T>]) -> Result<CopyEvidence> {
@@ -200,7 +226,7 @@ impl<S: CipherStore> Vault<S> {
             Ok(())
         }
     }
-    fn state(&self) -> Result<&State> {
+    fn state(&self) -> Result<&Catalog> {
         self.state.as_ref().ok_or(Error::Locked)
     }
     fn keys(&self) -> Result<&Keys> {
@@ -215,31 +241,42 @@ impl<S: CipherStore> Vault<S> {
         e.bytes(operation)?;
         self.keys()?.fingerprint(&e.0)
     }
-    fn prior(&self, request: RequestId, binding: [u8; 32]) -> Result<Option<(Revision, State)>> {
+    fn prior(&self, request: RequestId, binding: [u8; 32]) -> Result<Option<(Revision, Record)>> {
         let Some(head) = self.store.resolve(self.id(), request)? else {
             return Ok(None);
         };
         if head.index > self.head.index {
             return Err(Error::StaleAnchor);
         }
-        let state = self.read_state(head)?;
+        let state = self.read_record(head)?;
         if state.request != request || !bool::from(state.fingerprint.ct_eq(&binding)) {
             return Err(Error::Conflict);
         }
         Ok(Some((head, state)))
     }
-    fn read_state(&self, head: Revision) -> Result<State> {
+    fn read_record(&self, head: Revision) -> Result<Record> {
         let packet = load_packet(&self.store, head)?;
         if packet.header != self.header {
             return Err(Error::Corrupt);
         }
-        let state = State::decode(&packet.open(self.keys()?)?)?;
+        let state = Record::decode(&packet.open(self.keys()?)?)?;
         if state.request != packet.request {
             return Err(Error::Corrupt);
         }
         Ok(state)
     }
-    fn commit(&mut self, state: State) -> Result<Revision> {
+    fn read_entry(&self, id: SecretRef) -> Result<Entry> {
+        let loc = self.state()?.entries.get(&id).ok_or(Error::NotFound)?;
+        let entry = self.read_record(loc.revision)?.take_entry(id)?;
+        if entry.info.version != loc.version
+            || entry.info.kind != loc.kind
+            || entry.info.policy != loc.policy
+        {
+            return Err(Error::Corrupt);
+        }
+        Ok(entry)
+    }
+    fn commit(&mut self, state: Record) -> Result<Revision> {
         let packet = Packet::seal(
             self.header.clone(),
             self.keys()?,
@@ -252,13 +289,24 @@ impl<S: CipherStore> Vault<S> {
             index: packet.index,
             commit: identity(&bytes),
         };
+        self.state()?.validate(&state, expected)?;
         match self
             .store
             .append(self.id(), state.request, Some(self.head), bytes)
         {
             Ok(head) if head == expected => {
                 self.head = head;
-                self.state = Some(state);
+                if self
+                    .state
+                    .as_mut()
+                    .ok_or(Error::Locked)?
+                    .apply(&state, head)
+                    .is_err()
+                {
+                    self.pending_commit = Some(expected);
+                    self.mode = AccessMode::Frozen;
+                    return Err(Error::CommitUnknown);
+                }
                 Ok(head)
             }
             Ok(_) => {
@@ -279,7 +327,7 @@ impl<S: CipherStore> Vault<S> {
         }
     }
 }
-pub(crate) fn load_packet<S: CipherStore>(store: &S, r: Revision) -> Result<Packet> {
+pub(crate) fn load_packet<S: CipherStore + ?Sized>(store: &S, r: Revision) -> Result<Packet> {
     let value = checked(store.read(r)?, r)?;
     let packet = Packet::decode(&value.bytes)?;
     if packet.index != r.index {

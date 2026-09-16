@@ -1,18 +1,30 @@
+pub(crate) mod catalog;
+pub(crate) mod legacy;
+
 use crate::{
-    ActorId, Context, Entry, Error, MAX_ENTRIES, PolicyRef, RequestId, Result, SecretRef,
+    ActorId, Context, Entry, Error, PolicyRef, RequestId, Result, SecretRef,
     codec::{Decoder, Encoder},
 };
 use std::collections::{BTreeMap, BTreeSet};
 use zeroize::Zeroizing;
 
-pub(crate) struct State {
-    pub entries: BTreeMap<SecretRef, Entry>,
-    pub deleted: BTreeSet<SecretRef>,
+pub(crate) struct Record {
     pub request: RequestId,
     pub fingerprint: [u8; 32],
     pub receipt: Receipt,
+    pub change: Change,
 }
-
+pub(crate) enum Change {
+    Genesis,
+    Put(Box<Entry>),
+    Delete(SecretRef),
+    Use(Box<Entry>),
+    Legacy(Box<LegacyCatalog>),
+}
+pub(crate) struct LegacyCatalog {
+    pub entries: BTreeMap<SecretRef, Entry>,
+    pub deleted: BTreeSet<SecretRef>,
+}
 pub(crate) struct Receipt {
     pub context: Context,
     pub secret: Option<SecretRef>,
@@ -20,13 +32,12 @@ pub(crate) struct Receipt {
     pub operation: Zeroizing<Vec<u8>>,
     pub output: Zeroizing<Vec<u8>>,
 }
-impl State {
-    pub fn empty(request: RequestId, context: Context) -> Self {
+impl Record {
+    pub fn genesis(request: RequestId, context: Context) -> Self {
         Self {
-            entries: BTreeMap::new(),
-            deleted: BTreeSet::new(),
             request,
             fingerprint: [0; 32],
+            change: Change::Genesis,
             receipt: Receipt {
                 context,
                 secret: None,
@@ -38,7 +49,7 @@ impl State {
     }
     pub fn encode(&self) -> Result<Zeroizing<Vec<u8>>> {
         let mut e = Encoder::new();
-        e.fixed(b"VSTATE1");
+        e.fixed(b"VSTATE2");
         e.fixed(&self.request.0);
         e.fixed(&self.fingerprint);
         e.fixed(&self.receipt.context.actor.0);
@@ -53,19 +64,39 @@ impl State {
         e.u64(self.receipt.entry_version);
         e.bytes(&self.receipt.operation)?;
         e.bytes(&self.receipt.output)?;
-        e.u32(self.entries.len() as u32);
-        for entry in self.entries.values() {
-            entry.encode(&mut e)?;
-        }
-        e.u32(self.deleted.len() as u32);
-        for id in &self.deleted {
-            e.fixed(&id.0);
+        match &self.change {
+            Change::Genesis => e.byte(0),
+            Change::Put(entry) => {
+                e.byte(1);
+                entry.encode(&mut e)?;
+            }
+            Change::Delete(id) => {
+                e.byte(2);
+                e.fixed(&id.0);
+            }
+            Change::Use(entry) => {
+                e.byte(3);
+                entry.encode(&mut e)?;
+            }
+            Change::Legacy(_) => return Err(Error::Unsupported),
         }
         Ok(e.0)
     }
     pub fn decode(bytes: &[u8]) -> Result<Self> {
+        if bytes.starts_with(b"VSTATE1") {
+            let old = legacy::Snapshot::decode(bytes)?;
+            return Ok(Self {
+                request: old.request,
+                fingerprint: old.fingerprint,
+                receipt: old.receipt,
+                change: Change::Legacy(Box::new(LegacyCatalog {
+                    entries: old.entries,
+                    deleted: old.deleted,
+                })),
+            });
+        }
         let mut d = Decoder::new(bytes)?;
-        if d.take(7)? != b"VSTATE1" {
+        if d.take(7)? != b"VSTATE2" {
             return Err(Error::Unsupported);
         }
         let request = RequestId(d.array()?);
@@ -82,39 +113,18 @@ impl State {
         let entry_version = d.u64()?;
         let operation = Zeroizing::new(d.bytes(65536)?.to_vec());
         let output = Zeroizing::new(d.bytes(32768)?.to_vec());
-        let count = d.u32()? as usize;
-        if count > MAX_ENTRIES {
-            return Err(Error::Limit);
-        }
-        let mut entries = BTreeMap::new();
-        for _ in 0..count {
-            let entry = Entry::decode(&mut d)?;
-            if entries
-                .last_key_value()
-                .is_some_and(|(id, _)| *id >= entry.info.id)
-            {
-                return Err(Error::Corrupt);
-            }
-            entries.insert(entry.info.id, entry);
-        }
-        let count = d.u32()? as usize;
-        if count > crate::MAX_REVISIONS as usize {
-            return Err(Error::Limit);
-        }
-        let mut deleted = BTreeSet::new();
-        for _ in 0..count {
-            let id = SecretRef(d.array()?);
-            if deleted.last().is_some_and(|v| *v >= id) || entries.contains_key(&id) {
-                return Err(Error::Corrupt);
-            }
-            deleted.insert(id);
-        }
+        let change = match d.byte()? {
+            0 => Change::Genesis,
+            1 => Change::Put(Box::new(Entry::decode(&mut d)?)),
+            2 => Change::Delete(SecretRef(d.array()?)),
+            3 => Change::Use(Box::new(Entry::decode(&mut d)?)),
+            _ => return Err(Error::Unsupported),
+        };
         d.finish()?;
         Ok(Self {
-            entries,
-            deleted,
             request,
             fingerprint,
+            change,
             receipt: Receipt {
                 context,
                 secret,
@@ -124,8 +134,12 @@ impl State {
             },
         })
     }
-    pub fn duplicate(&self) -> Result<Self> {
-        Self::decode(&self.encode()?)
+    pub fn take_entry(self, id: SecretRef) -> Result<Entry> {
+        match self.change {
+            Change::Put(entry) | Change::Use(entry) if entry.info.id == id => Ok(*entry),
+            Change::Legacy(mut old) => old.entries.remove(&id).ok_or(Error::Corrupt),
+            _ => Err(Error::Corrupt),
+        }
     }
 }
 
@@ -133,28 +147,33 @@ impl State {
 mod tests {
     use super::*;
     #[test]
-    fn canonical_genesis_fixture_rejects_truncation_trailing_and_hostile_counts() {
-        // Frozen v1 fixture, assembled independently of Encoder.
-        let mut fixture = b"VSTATE1".to_vec();
-        fixture.extend([0x11; 32]);
-        fixture.extend([0; 32]);
-        fixture.extend([0x22; 32]);
-        fixture.extend([0x33; 32]);
-        fixture.extend([0; 25]);
-        assert_eq!(fixture.len(), 160);
-        let decoded = State::decode(&fixture).unwrap();
-        assert_eq!(decoded.request, RequestId([0x11; 32]));
-        assert_eq!(decoded.encode().unwrap().as_slice(), fixture);
-        for end in 0..fixture.len() {
-            assert!(State::decode(&fixture[..end]).is_err());
+    fn v2_genesis_has_a_fixed_encoding_and_rejects_truncation_and_extra_bytes() {
+        let record = Record::genesis(
+            RequestId([0x11; 32]),
+            Context {
+                actor: ActorId([0x22; 32]),
+                policy: PolicyRef([0x33; 32]),
+            },
+        );
+        let mut expected = b"VSTATE2".to_vec();
+        expected.extend([0x11; 32]);
+        expected.extend([0; 32]);
+        expected.extend([0x22; 32]);
+        expected.extend([0x33; 32]);
+        expected.extend([0; 18]);
+        assert_eq!(record.encode().unwrap().as_slice(), expected);
+        assert_eq!(
+            Record::decode(&expected)
+                .unwrap()
+                .encode()
+                .unwrap()
+                .as_slice(),
+            expected
+        );
+        for end in 0..expected.len() {
+            assert!(Record::decode(&expected[..end]).is_err());
         }
-        let mut trailing = fixture.clone();
-        trailing.push(0);
-        assert!(State::decode(&trailing).is_err());
-        for offset in [144, 148, 152, 156] {
-            let mut hostile = fixture.clone();
-            hostile[offset..offset + 4].fill(0xff);
-            assert!(State::decode(&hostile).is_err());
-        }
+        expected.push(0);
+        assert!(Record::decode(&expected).is_err());
     }
 }

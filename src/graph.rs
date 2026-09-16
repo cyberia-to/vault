@@ -1,5 +1,5 @@
 use crate::{
-    CipherStore, Error, MAX_REVISIONS, MAX_SNAPSHOT_BYTES, RequestId, Result, Revision,
+    CipherStore, Error, MAX_PACKET_BYTES, MAX_PAGE_SIZE, RequestId, Result, Revision,
     StoredRevision, VaultId,
 };
 use cybergraph::{
@@ -36,7 +36,7 @@ impl CipherStore for GraphStore {
     }
     fn read(&self, r: Revision) -> Result<StoredRevision> {
         let content = self.0.get(&r.commit).map_err(map)?.ok_or(Error::NotFound)?;
-        if content.codec() != Codec::Blob || content.bytes().len() > MAX_SNAPSHOT_BYTES {
+        if content.codec() != Codec::Blob || content.bytes().len() > MAX_PACKET_BYTES {
             return Err(Error::Corrupt);
         }
         Ok(StoredRevision {
@@ -44,11 +44,16 @@ impl CipherStore for GraphStore {
             bytes: content.bytes().to_vec(),
         })
     }
-    fn history(&self, vault: VaultId) -> Result<Vec<Revision>> {
-        let rows = self
-            .0
-            .history(&vault.0, None, MAX_REVISIONS as usize)
-            .map_err(map)?;
+    fn history_page(
+        &self,
+        vault: VaultId,
+        after: Option<u64>,
+        limit: usize,
+    ) -> Result<Vec<Revision>> {
+        if limit == 0 || limit > MAX_PAGE_SIZE {
+            return Err(Error::Limit);
+        }
+        let rows = self.0.history(&vault.0, after, limit).map_err(map)?;
         Ok(rows.into_iter().map(revision).collect())
     }
     fn resolve(&self, vault: VaultId, request: RequestId) -> Result<Option<Revision>> {
@@ -65,7 +70,7 @@ impl CipherStore for GraphStore {
         expected: Option<Revision>,
         bytes: Vec<u8>,
     ) -> Result<Revision> {
-        if bytes.len() > MAX_SNAPSHOT_BYTES {
+        if bytes.len() > MAX_PACKET_BYTES {
             return Err(Error::Limit);
         }
         let packet = crate::crypto::Packet::decode(&bytes)?;

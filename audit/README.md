@@ -51,3 +51,7 @@ the complete conformance matrix has passed.
 [Cybergraph and sync boundary — 2026-09-16](cybergraph-sync-boundary-2026-09-16/README.md)
 adds direct graph interoperability tests and records the missing shared live-sync
 adapter, with separate ownership for storage, archive transfer and networking.
+
+[Removal of catalog/history caps — 2026-09-16](unbounded-history-2026-09-16/README.md)
+supersedes the initial snapshot capacity limits with per-entry encrypted changes,
+paged history and compatibility with the original snapshots.

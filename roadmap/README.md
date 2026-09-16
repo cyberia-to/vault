@@ -41,6 +41,11 @@ migration; do not claim deletion from SSDs or backups.
 Password/recovery-factor rotation, efficient checkpoints/compaction and remaining
 secret-use adapters also need versioned formats and tests before general use.
 
+The local library now stores per-entry changes and streams history pages, with
+no total-entry/revision cap. Reopen still replays retained history and maintains
+an in-memory location/tombstone index. Checkpoint acceleration and a persistent
+index remain performance work; they must never introduce a lifetime quota.
+
 Later profiles may add concurrent devices, hardware-native custody, passkeys,
 private proving, threshold recovery and stronger traffic privacy. They must
 preserve the typed-secret, durability and evidence contracts. They are not

@@ -1,5 +1,8 @@
 use super::*;
-use crate::{record::Payload, state::Receipt};
+use crate::{
+    record::Payload,
+    state::{Change, Receipt},
+};
 
 impl<S: CipherStore> Vault<S> {
     pub fn derive_neuron<W: Ward>(
@@ -20,13 +23,7 @@ impl<S: CipherStore> Vault<S> {
     ) -> Result<PendingUse> {
         self.ready(true)?;
         let secret = operation.secret();
-        let info = self
-            .state()?
-            .entries
-            .get(&secret)
-            .ok_or(Error::NotFound)?
-            .info
-            .clone();
+        let info = self.read_entry(secret)?.info;
         if info.policy != context.policy {
             return Err(Error::Denied);
         }
@@ -60,17 +57,19 @@ impl<S: CipherStore> Vault<S> {
                     context,
                 });
             }
-            let mut state = self.state()?.duplicate()?;
-            let entry = state.entries.get_mut(&secret).ok_or(Error::NotFound)?;
-            let output = crate::use_secret::perform(entry, &operation, now)?;
-            state.request = request;
-            state.fingerprint = binding;
-            state.receipt = Receipt {
-                context,
-                secret: Some(secret),
-                entry_version: info.version,
-                operation: encoded,
-                output: output.encode(now)?,
+            let mut entry = self.read_entry(secret)?;
+            let output = crate::use_secret::perform(&mut entry, &operation, now)?;
+            let state = Record {
+                request,
+                fingerprint: binding,
+                change: Change::Use(Box::new(entry)),
+                receipt: Receipt {
+                    context,
+                    secret: Some(secret),
+                    entry_version: info.version,
+                    operation: encoded,
+                    output: output.encode(now)?,
+                },
             };
             let revision = self.commit(state)?;
             Ok(PendingUse {
@@ -95,7 +94,7 @@ impl<S: CipherStore> Vault<S> {
         self.current()?;
         if pending.vault != self.id()
             || pending.context != context
-            || !copies.covers(self.id(), pending.revision)
+            || !copies.covers(&self.store, self.id(), pending.revision)?
         {
             return Err(Error::ReplicationRequired);
         }
@@ -105,18 +104,12 @@ impl<S: CipherStore> Vault<S> {
         if self.store.resolve(self.id(), pending.request)? != Some(pending.revision) {
             return Err(Error::Conflict);
         }
-        let state = self.read_state(pending.revision)?;
+        let state = self.read_record(pending.revision)?;
         if state.receipt.context != context || state.request != pending.request {
             return Err(Error::Denied);
         }
         let operation = Operation::decode(&state.receipt.operation)?;
-        let info = self
-            .state()?
-            .entries
-            .get(&operation.secret())
-            .ok_or(Error::NotFound)?
-            .info
-            .clone();
+        let info = self.read_entry(operation.secret())?.info;
         if info.policy != context.policy || info.version != state.receipt.entry_version {
             return Err(Error::Denied);
         }
@@ -134,7 +127,7 @@ impl<S: CipherStore> Vault<S> {
             self.current()?;
             let (created_at, output) = Output::decode(&state.receipt.output)?;
             if let Operation::Otp { secret } = operation {
-                let entry = self.state()?.entries.get(&secret).ok_or(Error::NotFound)?;
+                let entry = self.read_entry(secret)?;
                 if let Payload::Otp { period, .. } = &entry.input.0
                     && *period != 0
                     && (now < created_at

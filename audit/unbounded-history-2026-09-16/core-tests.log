@@ -1,0 +1,57 @@
+
+running 6 tests
+test state::legacy::tests::canonical_genesis_fixture_rejects_truncation_trailing_and_hostile_counts ... ok
+test use_secret::tests::hotp_matches_rfc4226_independent_vectors ... ok
+test state::tests::v2_genesis_has_a_fixed_encoding_and_rejects_truncation_and_extra_bytes ... ok
+test crypto::tests::repeated_plaintext_uses_distinct_nonces_and_ciphertexts ... ok
+test use_secret::tests::totp_matches_rfc6238_sha1_and_sha256_vectors ... ok
+test crypto::tests::every_packet_byte_is_authenticated_or_structurally_rejected ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 1 test
+test malformed_or_oversized_secret_inputs_reject_without_echoing_content ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Compiling cyber-vault v0.1.0 (/Users/master/cyber/vault)
+    Finished `release` profile [optimized] target(s) in 1.39s
+     Running unittests src/lib.rs (target/release/deps/vault-3e0edc1651258a54)
+     Running tests/capacity.rs (target/release/deps/capacity-79e1987c5d9624f6)
+     Running tests/custody.rs (target/release/deps/custody-f7c6ddaddff66f32)
+     Running tests/cybergraph_boundary.rs (target/release/deps/cybergraph_boundary-30b7a0a9af19148d)
+     Running tests/input_bounds.rs (target/release/deps/input_bounds-6ab090da8f61fdbf)
+     Running tests/otp_identity.rs (target/release/deps/otp_identity-159e70f764df4098)
+     Running tests/recovery_faults.rs (target/release/deps/recovery_faults-41e845573d641f4a)
+   Doc-tests vault

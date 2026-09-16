@@ -18,6 +18,10 @@ restores against an independently retained revision. The isolated native service
 production Ward adapter and authenticated network sync remain implementation work.
 There is no production/installable release yet.
 
+The library has no configured limit on total records or revisions. It stores
+encrypted per-entry changes and reads history in pages; individual operations
+retain resource bounds. Existing snapshot histories remain readable.
+
 ## What Vault should make possible
 
 - **Keep everything that cannot be regenerated.** Imported passwords, external

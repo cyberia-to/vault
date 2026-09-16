@@ -1,5 +1,10 @@
 # Cybergraph and synchronization boundary — 2026-09-16
 
+Historical review at `a46aa17`. The later
+[capacity change](../unbounded-history-2026-09-16/README.md) replaces full snapshots
+and full-vector history reads with encrypted changes and paging. The missing
+shared live-sync deployment adapter remains an open finding.
+
 **Storage: integrated. Live private synchronization: incomplete.** Vault stores
 ordinary encrypted Cybergraph Blob content and application receipts through the
 shared BBG owner. Its current replication helper traverses/copies history inside

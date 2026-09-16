@@ -57,6 +57,11 @@ profile definitions here; they MUST NOT emerge as undocumented implementation
 defaults. [The roadmap](../roadmap/README.md) makes those decisions the first
 implementation package.
 
-`local-custody-v1` pins a smaller library profile for development. It does not
+`local-custody-v2` pins a smaller library profile for development. It does not
 relax the native service, authenticated replication or writer-transfer gates of
 the target deployment. Implementation evidence belongs in [audit](../audit/README.md).
+
+The library profile imposes no total record or revision count ceiling. It stores
+encrypted per-entry changes, reads history in pages and preserves v1 snapshots
+as a readable immutable prefix. Per-packet resource budgets are distinct from
+capacity. Exact encodings and compatibility are in the local profile.

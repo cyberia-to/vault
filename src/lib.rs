@@ -6,6 +6,7 @@ mod crypto;
 mod custody;
 #[cfg(feature = "graph-store")]
 mod graph;
+mod history;
 mod model;
 mod operation;
 mod record;

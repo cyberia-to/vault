@@ -1,4 +1,4 @@
-use crate::{Error, MAX_SNAPSHOT_BYTES, Result};
+use crate::{Error, MAX_PACKET_BYTES, Result};
 use zeroize::Zeroizing;
 
 pub(crate) struct Encoder(pub Zeroizing<Vec<u8>>);
@@ -20,7 +20,7 @@ impl Encoder {
     }
     pub fn bytes(&mut self, v: &[u8]) -> Result<()> {
         let len = u32::try_from(v.len()).map_err(|_| Error::Limit)?;
-        if self.0.len().saturating_add(v.len()).saturating_add(4) > MAX_SNAPSHOT_BYTES {
+        if self.0.len().saturating_add(v.len()).saturating_add(4) > MAX_PACKET_BYTES {
             return Err(Error::Limit);
         }
         self.u32(len);
@@ -37,7 +37,7 @@ pub(crate) struct Decoder<'a> {
 }
 impl<'a> Decoder<'a> {
     pub fn new(bytes: &'a [u8]) -> Result<Self> {
-        if bytes.len() > MAX_SNAPSHOT_BYTES {
+        if bytes.len() > MAX_PACKET_BYTES {
             return Err(Error::Limit);
         }
         Ok(Self { bytes, pos: 0 })
@@ -69,6 +69,9 @@ impl<'a> Decoder<'a> {
     }
     pub fn text(&mut self, max: usize) -> Result<String> {
         String::from_utf8(self.bytes(max)?.to_vec()).map_err(|_| Error::Corrupt)
+    }
+    pub fn remaining(&self) -> usize {
+        self.bytes.len() - self.pos
     }
     pub fn finish(self) -> Result<()> {
         if self.pos == self.bytes.len() {

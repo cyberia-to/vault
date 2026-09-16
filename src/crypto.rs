@@ -1,5 +1,5 @@
 use crate::{
-    Error, MAX_REVISIONS, MAX_SNAPSHOT_BYTES, Result, Revision, VaultId,
+    Error, MAX_PACKET_BYTES, Result, Revision, VaultId,
     codec::{Decoder, Encoder},
 };
 use argon2::{Algorithm, Argon2, Params, Version};
@@ -99,16 +99,13 @@ impl Packet {
         previous: Option<Revision>,
         plaintext: Zeroizing<Vec<u8>>,
     ) -> Result<Self> {
-        if plaintext.len() > MAX_SNAPSHOT_BYTES - 1024 {
+        if plaintext.len() > MAX_PACKET_BYTES - 1024 {
             return Err(Error::Limit);
         }
         let index = match previous {
             Some(r) => r.index.checked_add(1).ok_or(Error::Limit)?,
             None => 0,
         };
-        if index >= MAX_REVISIONS {
-            return Err(Error::Limit);
-        }
         let mut packet = Self {
             header,
             request,
@@ -166,9 +163,6 @@ impl Packet {
         let header = Header::decode(&mut d)?;
         let request = crate::RequestId(d.array()?);
         let index = d.u64()?;
-        if index >= MAX_REVISIONS {
-            return Err(Error::Limit);
-        }
         let previous = match d.byte()? {
             0 if index == 0 => None,
             1 if index > 0 => {
@@ -184,7 +178,7 @@ impl Packet {
             _ => return Err(Error::Corrupt),
         };
         let nonce = d.array()?;
-        let ciphertext = d.bytes(MAX_SNAPSHOT_BYTES - 512)?.to_vec();
+        let ciphertext = d.bytes(MAX_PACKET_BYTES - 512)?.to_vec();
         if ciphertext.len() < 16 {
             return Err(Error::Corrupt);
         }
