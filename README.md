@@ -2,7 +2,7 @@
 
 **Your secrets survive your devices.**
 
-Vault keeps the secrets of a person and their robot: neuron seeds, private keys,
+Vault keeps the secrets of a person and their robot: neuron spells, private keys,
 passwords, PINs, authenticators, recovery codes and service credentials. It lets
 authorized applications use them, keeps private replicas, and restores them
 when a device is lost.
@@ -12,11 +12,11 @@ the stack's first end-to-end storage and synchronization use case. It is also
 the secret-custody organ of [cyb](https://github.com/cyberia-to/cyb), available
 to headless hosts through the same contract.
 
-**Stage: local custody library.** Rust code now stores typed secrets through
+**Stage: local custody library and CLI.** Rust code now stores typed secrets through
 Cybergraph/BBG, reserves protected uses, verifies encrypted local replicas and
 restores against an independently retained revision. The isolated native service,
 production Ward adapter and authenticated network sync remain implementation work.
-There is no production/installable release yet.
+There is no packaged production release yet.
 
 The library has no configured limit on total records or revisions. It stores
 encrypted per-entry changes and reads history in pages; individual operations
@@ -25,10 +25,10 @@ retain resource bounds. Existing snapshot histories remain readable.
 ## What Vault should make possible
 
 - **Keep everything that cannot be regenerated.** Imported passwords, external
-  2FA enrollments and recovery codes have durable encrypted records. A seed is
+  2FA enrollments and recovery codes have durable encrypted records. A spell is
   not their backup.
 - **Use a secret without handing it to an agent.** Authorize a neuron action,
-  produce an OTP code or authenticate to an approved service. Root seeds and
+  produce an OTP code or authenticate to an approved service. Root spells and
   private keys stay inside custody.
 - **Keep private copies you control.** Replicas retain encrypted content without
   gaining permission to read it or act as you. You can replace a storage provider.
@@ -57,7 +57,7 @@ older data is reported explicitly; an empty replacement Vault is never success.
 
 Offline changes remain usable only within their explicit policy and are shown
 as local until protected. An acknowledged old backup does not protect new work.
-Data lost before replication cannot be recovered by a seed or a proof.
+Data lost before replication cannot be recovered by a spell or a proof.
 
 ## How it fits
 
@@ -83,6 +83,50 @@ writer. [Conformance](specs/conformance.md) defines the gates;
 require a later qualified profile.
 
 ## Try the implemented slice
+
+Build the local operator CLI (macOS/Linux; compatible sibling stack checkouts):
+
+```sh
+cargo build --release --bin vault --locked
+./target/release/vault
+./target/release/vault init --recovery-file /path/to/separate/recovery.factor
+./target/release/vault add spell --label "Main neuron" --scope neuron
+./target/release/vault add password --label "Mail" --scope mail --revealable
+./target/release/vault list
+```
+
+The CLI asks for secrets with hidden terminal prompts. `spell` is the Cyber
+name for recovery words/root material; imports preserve the existing BIP-39
+derivation. Spells have no reveal/export command. Default storage is
+`~/.cyber/vault`, backed by Cybergraph and BBG/Fjall.
+
+Register two ciphertext destinations before protected use:
+
+```sh
+./target/release/vault replica-add --path /Volumes/backup-a/vault --failure-domain disk-a
+./target/release/vault replica-add --path /Volumes/backup-b/vault --failure-domain disk-b
+./target/release/vault sync
+./target/release/vault checkpoint --out /path/to/separate/checkpoint.json
+```
+
+`show ID`, `otp ID`, `recovery-code ID`, `derive-neuron ID` and `sign ID` reserve their
+operation and verify both copies before delivering a result. Keep the printed
+request ID when retrying an interrupted use. This is local operator custody;
+the declared disk names do not establish physical independence by themselves.
+
+[CLI guide](docs/cli.md) · [CLI contract](specs/cli.md)
+
+Sign without exporting the key:
+
+```sh
+./target/release/vault sign ENTRY_ID --subject NEURON_HEX --statement ACTION_COMMITMENT_HEX
+```
+
+The existing Mudra NSIG1 profile preserves native IDs and signature bytes.
+Trusted local hosts can embed `local::Signer` with the `local-host` feature.
+Neuron selects the same custody with `--vault-home PATH --vault-root ENTRY_ID`
+and optional `--vault-domain DOMAIN`. Its action grant remains checked while
+Vault reserves, replicates and releases each signature. See the [sign contract](specs/sign.md).
 
 With compatible sibling stack checkouts, run the synthetic recovery demonstration:
 

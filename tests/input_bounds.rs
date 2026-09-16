@@ -19,7 +19,7 @@ fn malformed_or_oversized_secret_inputs_reject_without_echoing_content() {
     assert!(
         SecretInput::recovery_codes((0..65).map(|n| Zeroizing::new(vec![n])).collect()).is_err()
     );
-    let error = SecretInput::mnemonic("synthetic-private-string-not-a-mnemonic", "").unwrap_err();
+    let error = SecretInput::spell("synthetic-private-string-not-a-spell", "").unwrap_err();
     assert!(!error.to_string().contains("synthetic-private-string"));
     let input =
         SecretInput::password(Zeroizing::new(b"synthetic-private-string".to_vec())).unwrap();

@@ -55,3 +55,11 @@ adapter, with separate ownership for storage, archive transfer and networking.
 [Removal of catalog/history caps — 2026-09-16](unbounded-history-2026-09-16/README.md)
 supersedes the initial snapshot capacity limits with per-entry encrypted changes,
 paged history and compatibility with the original snapshots.
+
+[Spell terminology and local CLI — 2026-09-16](spell-cli-2026-09-16/README.md)
+records API/format compatibility, process and terminal tests, retained-anchor
+reconciliation, and the local operator host's deployment boundary.
+
+[Native signing and Neuron custody — 2026-09-16](sign-2026-09-16/README.md)
+records `sign`, NSIG1 byte compatibility, shared local host custody and the tested
+Neuron integration over the ongoing convergence tree.

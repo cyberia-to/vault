@@ -7,6 +7,8 @@ mod custody;
 #[cfg(feature = "graph-store")]
 mod graph;
 mod history;
+#[cfg(feature = "local-host")]
+pub mod local;
 mod model;
 mod operation;
 mod record;
@@ -20,7 +22,7 @@ pub use custody::{AccessMode, Vault};
 pub use graph::GraphStore;
 pub use model::*;
 pub use operation::{
-    Derivation, Intent, IntentKind, NeuronKeyRef, Operation, Output, PendingUse, Ward,
+    Derivation, Intent, IntentKind, NeuronKeyRef, Operation, Output, PendingUse, SignRequest, Ward,
 };
 pub use record::{Entry, EntryInfo, OtpAlgorithm, SecretInput, SecretKind};
 pub use replication::{CopyEvidence, Replica};

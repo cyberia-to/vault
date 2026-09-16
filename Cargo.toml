@@ -10,8 +10,10 @@ repository = "https://github.com/cyberia-to/vault"
 name = "vault"
 
 [features]
-default = ["graph-store"]
+default = ["graph-store", "cli"]
 graph-store = ["dep:cybergraph"]
+local-host = ["graph-store", "dep:serde", "dep:serde_json", "dep:rpassword", "dep:tempfile", "dep:rustix", "dep:hex"]
+cli = ["local-host", "dep:clap", "dep:data-encoding"]
 
 [dependencies]
 argon2 = { version = "0.5.3", features = ["zeroize"] }
@@ -25,6 +27,14 @@ subtle = "2"
 mudra = { package = "cyber-mudra", path = "../mudra" }
 hemera = { package = "cyber-hemera", path = "../hemera/rs" }
 cybergraph = { path = "../cybergraph", features = ["local-storage"], optional = true }
+clap = { version = "4", features = ["derive"], optional = true }
+serde = { version = "1", features = ["derive"], optional = true }
+serde_json = { version = "1", optional = true }
+rpassword = { version = "7", optional = true }
+tempfile = { version = "3", optional = true }
+rustix = { version = "1", features = ["process"], optional = true }
+hex = { version = "0.4", optional = true }
+data-encoding = { version = "2", optional = true }
 
 [dev-dependencies]
 tempfile = "3"
@@ -35,5 +45,10 @@ required-features = ["graph-store"]
 
 [lints.rust]
 unsafe_code = "forbid"
+
+[[bin]]
+name = "vault"
+path = "src/bin/vault.rs"
+required-features = ["cli"]
 
 [workspace]

@@ -135,16 +135,16 @@ fn totp_uses_ward_time_and_expired_receipt_does_not_mint_a_new_code() {
 fn derive_neuron_preserves_mudra_bridge_and_domain_public_bytes() {
     let mut f = Fixture::new();
     let words = "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about";
-    let seed = f.put(SecretInput::mnemonic(words, "").unwrap(), false);
+    let spell = f.put(SecretInput::spell(words, "").unwrap(), false);
     let domain = f.put(
         SecretInput::domain_root(Zeroizing::new([7; 32])).unwrap(),
         false,
     );
     let profiles = [
         NeuronKeyRef {
-            root: seed,
+            root: spell,
             derivation: Derivation::Cosmos {
-                path: mudra::seed::COSMOS_PATH.into(),
+                path: mudra::spell::COSMOS_PATH.into(),
                 hrp: "cosmos".into(),
             },
         },
@@ -159,7 +159,7 @@ fn derive_neuron_preserves_mudra_bridge_and_domain_public_bytes() {
     for profile in profiles {
         let (expected_public, expected_address) = match &profile.derivation {
             Derivation::Cosmos { hrp, .. } => {
-                let key = mudra::seed::cosmos_key(words, "").unwrap();
+                let key = mudra::spell::cosmos_key(words, "").unwrap();
                 let pk = mudra::cosmos::compressed(key.verifying_key());
                 (pk, mudra::cosmos::address(&pk, hrp).unwrap())
             }
