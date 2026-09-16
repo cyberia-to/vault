@@ -11,6 +11,40 @@ Cybergraph and the selected stack adapters supply history transfer, conditional
 admission, framing and transport. A new Vault-specific P2P or consensus engine
 is not required by this contract.
 
+## Shared graph boundary
+
+The production path is Vault → Cybergraph private application synchronization →
+Foculus/selected stack synchronization and Tape/Radio transport → the receiver's
+Cybergraph → BBG Database. Vault supplies the encrypted application format,
+lineage/admission validation and protection policy. Generic history traversal,
+content transfer, resumable cursors and durable replica receipts belong behind
+Cybergraph's shared port; a Vault-owned network or database-copy engine MUST NOT
+become that port.
+
+This boundary requires a live application-history adapter. A sealed archive
+transfer that disables its source writer has different lifecycle semantics and
+MUST NOT substitute for ongoing replication. File-registry LWW/CRDT merge MUST
+NOT select a Vault head or resolve a credential, counter, grant or writer fork.
+Immutable ciphertext may use shared content distribution only with the declared
+closure, retention and admission checks above it.
+
+The receiving peer authenticates the replication role and scope independently
+of custody decryption. It validates the exact request/head/predecessor binding,
+bounded ciphertext closure and current writer epoch before BBG publication. An
+opaque Blob's valid content hash establishes graph content validity; it does
+not by itself establish Vault schema validity or current writer authority.
+The restoring custody service separately checks AEAD and decrypted semantics.
+
+A shared database owner does not put application tables into the public BBG
+polynomial root or publish private history as neuron signals. The profile MUST
+identify the actual private-history commitment and independent freshness anchor.
+No unrelated namespace or application content may be disclosed by sync discovery.
+
+The local profile's readback-copy helper supplies bounded development evidence.
+Its results MUST NOT be promoted to authenticated network `Protected(R)` status.
+Production activation requires the shared adapter and the deployment gates in
+[conformance](conformance.md).
+
 ## Roles
 
 | Role | Has | Does not acquire implicitly |

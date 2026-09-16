@@ -26,9 +26,12 @@ migration; do not claim deletion from SSDs or backups.
 2. Wrap the library in native custody isolation and implement real Ward caller
    authentication, current authorization and protected input/output adapters.
    Keep the same `derive_neuron` results while moving Neuron clients behind them.
-3. Connect the selected stack transport to authenticated replica identities,
-   durable receipts, retention and resumable synchronization. Replace local copy
-   labels with a concrete deployment policy and evidence.
+3. Build the shared **live private application-history sync adapter behind
+   Cybergraph**, using Foculus and the selected stack transport. Move Vault's
+   local copy loop behind that port; add authenticated replica identities,
+   scope/epoch admission, durable receipts, retention and resumable bounded
+   transfer. Keep sealed archive migration separate and reject LWW head selection.
+   Replace local copy labels with a concrete deployment policy and evidence.
 4. Implement portable recovery locators, independent anchor retention, uncertain
    genesis reconciliation and writer fencing/handover. Recovery must activate a
    replacement device only after the previous writer is fenced.

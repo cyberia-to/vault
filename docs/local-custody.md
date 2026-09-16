@@ -39,6 +39,12 @@ default Fjall store. Backend choice remains BBG's responsibility.
 durable atomic compare-and-swap, exact request deduplication and uncertainty
 reporting. Supplying another implementation inherits those obligations.
 
+The [Cybergraph boundary check](../audit/cybergraph-sync-boundary-2026-09-16/README.md)
+demonstrates raw graph read/copy/reopen compatibility. `Vault::replicate` remains
+a local helper; importing this crate does not activate Foculus networking or a
+live private-history synchronization service. Graph archive `Transfer` seals
+its source writer and must not be used as a live replica loop.
+
 Implement `Ward::with_authorization`. Authenticate the actor and policy, inspect
 the exact typed `Intent`, and hold current authorization until the callback
 finishes. Supply trusted Unix time in seconds to the callback. A caller-provided

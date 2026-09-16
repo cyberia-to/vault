@@ -95,6 +95,10 @@ Local copy verification uses Cybergraph commits and readback. Its result is
 explicitly local evidence, not an authenticated remote provider receipt or proof
 of physical failure-domain independence. The host supplies failure-domain labels.
 Ciphertext transfer works without unlocking; replayed/divergent prefixes reject.
+The local helper iterates application history itself; it is a development
+implementation, not the shared live synchronization adapter required by the
+[deployment contract](synchronization.md#shared-graph-boundary). Each validation
+walk reads the complete retained history, even when only new packets are copied.
 
 Open and restore require an independently supplied exact Revision anchor and
 verify the complete contiguous history to it. An older or newer selected store

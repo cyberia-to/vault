@@ -21,7 +21,7 @@ of the product binary; repository, organ, crate and process are separate units.
 | Sigma | Assets, neuron attachments and active subject selection |
 | Cybergraph | Canonical application history, schema/admission integration, private storage and sync entry points |
 | BBG Database | Shared physical transaction owner, conditional writes, receipts and actual backend durability |
-| Selected sync / Foculus profile | Authenticated ordering/fencing or consensus where explicitly required; local Vault commits do not assert finality |
+| Foculus / selected sync profile | Shared synchronization mechanics and explicitly selected ordering/fencing or consensus; local Vault commits do not assert finality |
 | Tape / Radio | Declared framing / transport, neither supplies custody authority |
 | Body / workers | Device placement, process supervision, resource limits and qualified private execution |
 | Com / cyb | Protected entry, approval and presentation; ordinary UI/Soma context gets only permitted results |

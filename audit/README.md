@@ -20,12 +20,13 @@ Local source contracts additionally inspected for this design:
 recovery contracts. Some adjacent repositories contain concurrent uncommitted
 work; this repository does not publish or certify those changes.
 
-The older soft3 sync/tape proposal references a separate `sync` repository absent
-from this checkout and has unresolved ownership wording. Vault therefore binds
-to a selected stack synchronization/fencing profile rather than declaring that
-proposal's specific adapter already exists. The first profile must select and
-qualify the real adapter; native local BBG/Cybergraph commits alone do not supply
-distributed fencing, private replication or current recovery anchors.
+The initial design review noted that a separate `sync` checkout was absent.
+The subsequent source review corrects the ownership interpretation: the soft3
+proposal explicitly records `sync` merging into Foculus. Foculus has real
+structural-sync and file-distribution code; its existing file registry is not
+the live private application-history adapter Vault requires. Native local
+BBG/Cybergraph commits alone do not supply distributed fencing, private network
+replication or current recovery anchors. See the boundary review below.
 
 ## Initial design baseline
 
@@ -46,3 +47,7 @@ source references, not runtime behavior or remote service availability.
 Rust implementation, synthetic recovery drill, failure tests and deployment
 gaps. This supersedes the baseline's lack of runtime evidence without claiming
 the complete conformance matrix has passed.
+
+[Cybergraph and sync boundary — 2026-09-16](cybergraph-sync-boundary-2026-09-16/README.md)
+adds direct graph interoperability tests and records the missing shared live-sync
+adapter, with separate ownership for storage, archive transfer and networking.

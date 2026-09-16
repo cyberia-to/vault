@@ -1,0 +1,41 @@
+[
+  {
+    "command": [
+      "cargo",
+      "test",
+      "--release",
+      "--locked",
+      "--test",
+      "cybergraph_boundary",
+      "--test",
+      "recovery_faults"
+    ],
+    "exit_code": 0,
+    "elapsed_seconds": 21.152
+  },
+  {
+    "command": [
+      "cargo",
+      "clippy",
+      "--all-targets",
+      "--no-deps",
+      "--locked",
+      "--",
+      "-D",
+      "warnings"
+    ],
+    "exit_code": 0,
+    "elapsed_seconds": 1.122
+  },
+  {
+    "command": [
+      "cargo",
+      "fmt",
+      "--package",
+      "cyber-vault",
+      "--check"
+    ],
+    "exit_code": 0,
+    "elapsed_seconds": 0.066
+  }
+]
