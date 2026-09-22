@@ -68,8 +68,9 @@ impl SecretInput {
         if words.len() > 1024 || passphrase.len() > 1024 {
             return Err(Error::Limit);
         }
-        let seed =
-            Zeroizing::new(mudra::seed::seed(words, passphrase).map_err(|_| Error::InvalidInput)?);
+        let seed = Zeroizing::new(
+            mudra::spell::derive(words, passphrase).map_err(|_| Error::InvalidInput)?,
+        );
         Self::bytes(SecretKind::Bip39Seed, Zeroizing::new(seed.to_vec()))
     }
     pub fn totp(
