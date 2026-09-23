@@ -300,4 +300,68 @@ mod tests {
         };
         assert_ne!(seal().encode().unwrap(), seal().encode().unwrap());
     }
+    #[test]
+    fn header_create_rejects_passphrase_outside_length_bounds() {
+        let recovery = [9; 32];
+        assert!(matches!(
+            Header::create(VaultId([1; 32]), &vec![b'a'; 11], &recovery),
+            Err(Error::InvalidInput)
+        ));
+        assert!(matches!(
+            Header::create(VaultId([1; 32]), &vec![b'a'; 1025], &recovery),
+            Err(Error::InvalidInput)
+        ));
+        assert!(Header::create(VaultId([1; 32]), &vec![b'a'; 12], &recovery).is_ok());
+        assert!(Header::create(VaultId([1; 32]), &vec![b'a'; 1024], &recovery).is_ok());
+    }
+    #[test]
+    fn header_unlock_recovers_the_same_keys_only_with_the_right_password() {
+        let recovery = [9; 32];
+        let (header, keys) =
+            Header::create(VaultId([1; 32]), b"correct horse battery staple", &recovery).unwrap();
+        let unlocked = header.unlock(b"correct horse battery staple").unwrap();
+        assert_eq!(*unlocked.0, *keys.0);
+        assert!(matches!(
+            header.unlock(b"wrong password entirely"),
+            Err(Error::Authentication)
+        ));
+    }
+    #[test]
+    fn header_recover_returns_the_same_keys_only_with_the_right_recovery_key() {
+        let recovery = [9; 32];
+        let (header, keys) =
+            Header::create(VaultId([1; 32]), b"correct horse battery staple", &recovery).unwrap();
+        let recovered = header.recover(&recovery).unwrap();
+        assert_eq!(*recovered.0, *keys.0);
+        assert!(matches!(
+            header.recover(&[8; 32]),
+            Err(Error::Authentication)
+        ));
+    }
+    #[test]
+    fn header_encode_decode_round_trips() {
+        let recovery = [9; 32];
+        let (header, _keys) =
+            Header::create(VaultId([3; 32]), b"correct horse battery staple", &recovery).unwrap();
+        let mut e = Encoder::new();
+        header.encode(&mut e);
+        let mut d = Decoder::new(&e.0).unwrap();
+        let decoded = Header::decode(&mut d).unwrap();
+        assert!(header == decoded);
+    }
+    #[test]
+    fn header_decode_rejects_wrong_magic() {
+        let bytes = vec![b'X'; 5 + 32 + 16 + WRAP_BYTES + WRAP_BYTES];
+        let mut d = Decoder::new(&bytes).unwrap();
+        assert!(matches!(Header::decode(&mut d), Err(Error::Unsupported)));
+    }
+    #[test]
+    fn fingerprint_is_deterministic_and_distinct_per_key_and_input() {
+        let key_a = Keys(Zeroizing::new([1; 32]));
+        let key_b = Keys(Zeroizing::new([2; 32]));
+        let fp1 = key_a.fingerprint(b"request one").unwrap();
+        assert_eq!(fp1, key_a.fingerprint(b"request one").unwrap());
+        assert_ne!(fp1, key_a.fingerprint(b"request two").unwrap());
+        assert_ne!(fp1, key_b.fingerprint(b"request one").unwrap());
+    }
 }
