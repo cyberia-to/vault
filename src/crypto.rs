@@ -300,4 +300,75 @@ mod tests {
         };
         assert_ne!(seal().encode().unwrap(), seal().encode().unwrap());
     }
+
+    #[test]
+    fn header_create_unlock_roundtrips_with_the_right_passphrase() {
+        let recovery = [9; 32];
+        let (header, keys) =
+            Header::create(VaultId([1; 32]), b"correct horse battery", &recovery).unwrap();
+        let unlocked = header.unlock(b"correct horse battery").unwrap();
+        assert_eq!(keys.0.as_slice(), unlocked.0.as_slice());
+    }
+
+    #[test]
+    fn header_unlock_rejects_a_wrong_passphrase() {
+        let recovery = [9; 32];
+        let (header, _keys) =
+            Header::create(VaultId([1; 32]), b"correct horse battery", &recovery).unwrap();
+        assert!(header.unlock(b"wrong horse battery!").is_err());
+    }
+
+    #[test]
+    fn header_recover_roundtrips_and_rejects_a_wrong_key() {
+        let recovery = [9; 32];
+        let (header, keys) =
+            Header::create(VaultId([1; 32]), b"correct horse battery", &recovery).unwrap();
+        let recovered = header.recover(&recovery).unwrap();
+        assert_eq!(keys.0.as_slice(), recovered.0.as_slice());
+        assert!(header.recover(&[0; 32]).is_err());
+    }
+
+    #[test]
+    fn header_create_rejects_passphrase_length_out_of_bounds() {
+        let recovery = [9; 32];
+        assert!(Header::create(VaultId([1; 32]), b"short", &recovery).is_err());
+        let too_long = vec![b'a'; 1025];
+        assert!(Header::create(VaultId([1; 32]), &too_long, &recovery).is_err());
+    }
+
+    #[test]
+    fn header_encode_decode_roundtrips_and_rejects_a_bad_magic() {
+        let recovery = [9; 32];
+        let (header, _keys) =
+            Header::create(VaultId([2; 32]), b"correct horse battery", &recovery).unwrap();
+        let mut e = Encoder::new();
+        header.encode(&mut e);
+        let bytes = e.0.to_vec();
+        let mut d = Decoder::new(&bytes).unwrap();
+        let decoded = Header::decode(&mut d).unwrap();
+        assert!(decoded == header);
+
+        let mut corrupt = bytes.clone();
+        corrupt[0] ^= 1;
+        let mut d = Decoder::new(&corrupt).unwrap();
+        assert!(Header::decode(&mut d).is_err());
+    }
+
+    #[test]
+    fn fingerprint_is_deterministic_and_separated_by_key_and_bytes() {
+        let a = Keys(Zeroizing::new([1; 32]));
+        let b = Keys(Zeroizing::new([2; 32]));
+        assert_eq!(
+            a.fingerprint(b"same request").unwrap(),
+            a.fingerprint(b"same request").unwrap()
+        );
+        assert_ne!(
+            a.fingerprint(b"same request").unwrap(),
+            b.fingerprint(b"same request").unwrap()
+        );
+        assert_ne!(
+            a.fingerprint(b"request one").unwrap(),
+            a.fingerprint(b"request two").unwrap()
+        );
+    }
 }
