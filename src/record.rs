@@ -69,7 +69,7 @@ impl SecretInput {
             return Err(Error::Limit);
         }
         let seed =
-            Zeroizing::new(mudra::seed::seed(words, passphrase).map_err(|_| Error::InvalidInput)?);
+            Zeroizing::new(mudra::spell::derive(words, passphrase).map_err(|_| Error::InvalidInput)?);
         Self::bytes(SecretKind::Bip39Seed, Zeroizing::new(seed.to_vec()))
     }
     pub fn totp(
@@ -340,5 +340,191 @@ impl Entry {
             Self::new(id, label, scope, policy, revealable, input).map_err(|_| Error::Corrupt)?;
         entry.info.version = version;
         Ok(entry)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn zv(bytes: &[u8]) -> Zeroizing<Vec<u8>> {
+        Zeroizing::new(bytes.to_vec())
+    }
+
+    #[test]
+    fn password_pin_token_reject_empty_and_oversized() {
+        assert!(SecretInput::password(zv(b"")).is_err());
+        assert!(SecretInput::password(zv(b"hunter2")).is_ok());
+        assert!(SecretInput::pin(zv(b"")).is_err());
+        assert!(SecretInput::pin(zv(&vec![b'1'; 129])).is_err());
+        assert!(SecretInput::pin(zv(&vec![b'1'; 128])).is_ok());
+        assert!(SecretInput::token(zv(&vec![b'a'; MAX_SECRET_BYTES + 1])).is_err());
+        assert!(SecretInput::token(zv(&vec![b'a'; MAX_SECRET_BYTES])).is_ok());
+    }
+
+    #[test]
+    fn domain_root_requires_exactly_32_bytes() {
+        let input = SecretInput::domain_root(Zeroizing::new([7; 32])).unwrap();
+        assert_eq!(input.kind(), SecretKind::DomainRoot);
+        assert!(SecretInput::generate_domain_root().is_ok());
+    }
+
+    #[test]
+    fn totp_rejects_period_outside_15_to_120_seconds() {
+        assert!(SecretInput::totp(zv(&[1; 20]), OtpAlgorithm::Sha1, 6, 14).is_err());
+        assert!(SecretInput::totp(zv(&[1; 20]), OtpAlgorithm::Sha1, 6, 121).is_err());
+        assert!(SecretInput::totp(zv(&[1; 20]), OtpAlgorithm::Sha1, 6, 30).is_ok());
+    }
+
+    #[test]
+    fn otp_key_length_and_digit_count_are_bounded() {
+        assert!(SecretInput::totp(zv(&[1; 19]), OtpAlgorithm::Sha1, 6, 30).is_err());
+        assert!(SecretInput::totp(zv(&[1; 65]), OtpAlgorithm::Sha1, 6, 30).is_err());
+        assert!(SecretInput::totp(zv(&[1; 20]), OtpAlgorithm::Sha1, 7, 30).is_err());
+        assert!(SecretInput::hotp(zv(&[1; 20]), OtpAlgorithm::Sha256, 8, 0).is_ok());
+        assert_eq!(
+            SecretInput::hotp(zv(&[1; 20]), OtpAlgorithm::Sha256, 8, 0)
+                .unwrap()
+                .kind(),
+            SecretKind::Hotp
+        );
+    }
+
+    #[test]
+    fn recovery_codes_reject_empty_oversized_and_duplicate_values() {
+        assert!(SecretInput::recovery_codes(vec![]).is_err());
+        assert!(SecretInput::recovery_codes(vec![zv(b""); 1]).is_err());
+        assert!(SecretInput::recovery_codes(vec![zv(&vec![b'x'; 257])]).is_err());
+        assert!(SecretInput::recovery_codes(vec![zv(b"code-a"), zv(b"code-a")]).is_err());
+        assert!(SecretInput::recovery_codes(vec![zv(&vec![b'x'; 32]); 65]).is_err());
+        let codes: Vec<_> = (0..3u8).map(|i| zv(&[i, i, i])).collect();
+        assert!(SecretInput::recovery_codes(codes).is_ok());
+    }
+
+    #[test]
+    fn secret_input_encode_decode_roundtrips_every_kind() {
+        for input in [
+            SecretInput::password(zv(b"hunter2")).unwrap(),
+            SecretInput::pin(zv(b"1234")).unwrap(),
+            SecretInput::domain_root(Zeroizing::new([9; 32])).unwrap(),
+            SecretInput::totp(zv(&[1; 20]), OtpAlgorithm::Sha256, 8, 60).unwrap(),
+            SecretInput::hotp(zv(&[2; 32]), OtpAlgorithm::Sha1, 6, 41).unwrap(),
+            SecretInput::recovery_codes(vec![zv(b"one"), zv(b"two")]).unwrap(),
+        ] {
+            let kind = input.kind();
+            let mut e = Encoder::new();
+            input.encode(&mut e).unwrap();
+            let mut d = Decoder::new(&e.0).unwrap();
+            let decoded = SecretInput::decode(&mut d).unwrap();
+            assert_eq!(decoded.kind(), kind);
+        }
+    }
+
+    #[test]
+    fn secret_input_decode_rejects_an_unknown_kind_byte() {
+        let mut e = Encoder::new();
+        e.byte(0);
+        let mut d = Decoder::new(&e.0).unwrap();
+        assert!(SecretInput::decode(&mut d).is_err());
+    }
+
+    #[test]
+    fn secret_input_decode_rejects_totp_hotp_period_kind_mismatch() {
+        // Encode as Totp (kind byte 4) but with period == 0, which validate()
+        // would classify back as Hotp — decode must catch the mismatch, not
+        // silently reclassify it.
+        let mut e = Encoder::new();
+        e.byte(SecretKind::Totp as u8);
+        e.bytes(&[1; 20]).unwrap();
+        e.byte(OtpAlgorithm::Sha1 as u8);
+        e.byte(6);
+        e.u64(0);
+        e.u32(0);
+        let mut d = Decoder::new(&e.0).unwrap();
+        assert!(SecretInput::decode(&mut d).is_err());
+    }
+
+    fn entry(revealable: bool, kind_input: SecretInput) -> Result<Entry> {
+        Entry::new(
+            SecretRef([1; 16]),
+            "label".into(),
+            "scope".into(),
+            PolicyRef([2; 32]),
+            revealable,
+            kind_input,
+        )
+    }
+
+    #[test]
+    fn entry_rejects_empty_or_oversized_label_and_scope() {
+        assert!(
+            Entry::new(
+                SecretRef([1; 16]),
+                "".into(),
+                "scope".into(),
+                PolicyRef([2; 32]),
+                false,
+                SecretInput::password(zv(b"hunter2")).unwrap(),
+            )
+            .is_err()
+        );
+        assert!(
+            Entry::new(
+                SecretRef([1; 16]),
+                "a".repeat(257),
+                "scope".into(),
+                PolicyRef([2; 32]),
+                false,
+                SecretInput::password(zv(b"hunter2")).unwrap(),
+            )
+            .is_err()
+        );
+        assert!(
+            Entry::new(
+                SecretRef([1; 16]),
+                "label".into(),
+                "".into(),
+                PolicyRef([2; 32]),
+                false,
+                SecretInput::password(zv(b"hunter2")).unwrap(),
+            )
+            .is_err()
+        );
+    }
+
+    #[test]
+    fn entry_revealable_is_denied_outside_password_and_pin() {
+        assert!(entry(true, SecretInput::password(zv(b"hunter2")).unwrap()).is_ok());
+        assert!(entry(true, SecretInput::pin(zv(b"1234")).unwrap()).is_ok());
+        assert!(
+            entry(
+                true,
+                SecretInput::domain_root(Zeroizing::new([1; 32])).unwrap()
+            )
+            .is_err()
+        );
+        assert!(
+            entry(
+                false,
+                SecretInput::domain_root(Zeroizing::new([1; 32])).unwrap()
+            )
+            .is_ok()
+        );
+    }
+
+    #[test]
+    fn entry_encode_decode_roundtrips_and_preserves_version() {
+        let mut e = entry(false, SecretInput::password(zv(b"hunter2")).unwrap()).unwrap();
+        e.info.version = 7;
+        let mut buf = Encoder::new();
+        e.encode(&mut buf).unwrap();
+        let mut d = Decoder::new(&buf.0).unwrap();
+        let decoded = Entry::decode(&mut d).unwrap();
+        assert_eq!(decoded.info.id.0, e.info.id.0);
+        assert_eq!(decoded.info.label, e.info.label);
+        assert_eq!(decoded.info.scope, e.info.scope);
+        assert_eq!(decoded.info.policy.0, e.info.policy.0);
+        assert_eq!(decoded.info.version, 7);
+        assert_eq!(decoded.info.kind, e.info.kind);
     }
 }
