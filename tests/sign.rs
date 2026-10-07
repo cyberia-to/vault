@@ -8,12 +8,12 @@ use zeroize::Zeroizing;
 const WORDS: &str =
     "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about";
 
-fn domain(f: &mut Fixture) -> (SignRequest, mudra::SigningKey) {
+fn domain(f: &mut Fixture) -> (SignRequest, neuron_auth::SigningKey) {
     let root = f.put(
         SecretInput::domain_root(Zeroizing::new([7; 32])).unwrap(),
         false,
     );
-    let key = mudra::domain::DomainKey::derive(&[7; 32], "example.test", "bostrom").unwrap();
+    let key = neuron_auth::domain::DomainKey::derive(&[7; 32], "example.test", "bostrom").unwrap();
     (
         SignRequest {
             key: NeuronKeyRef {
@@ -30,15 +30,15 @@ fn domain(f: &mut Fixture) -> (SignRequest, mudra::SigningKey) {
     )
 }
 
-// Assemble the pre-existing envelope independently of mudra::neuron::sign.
-fn legacy(key: &mudra::SigningKey, statement: [u8; 32]) -> Vec<u8> {
-    let public = mudra::cosmos::compressed(key.verifying_key());
-    let address = mudra::cosmos::address(&public, "neuron").unwrap();
+// Assemble the pre-existing envelope independently of neuron_auth::neuron::sign.
+fn legacy(key: &neuron_auth::SigningKey, statement: [u8; 32]) -> Vec<u8> {
+    let public = neuron_auth::cosmos::compressed(key.verifying_key());
+    let address = neuron_auth::cosmos::address(&public, "neuron").unwrap();
     let mut message = b"cyber:neuron:authority:v1:".to_vec();
     message.extend(statement);
     let mut evidence = b"NSIG1".to_vec();
     evidence.extend(public);
-    evidence.extend(mudra::claim::sign_arbitrary(key, &address, &message));
+    evidence.extend(neuron_auth::claim::sign_arbitrary(key, &address, &message));
     evidence
 }
 
@@ -50,7 +50,7 @@ fn release(f: &Fixture, pending: &PendingUse, expected: &SignRequest) -> Vec<u8>
                 panic!()
             };
             assert_eq!(&request, expected);
-            assert!(mudra::neuron::verify_statement(
+            assert!(neuron_auth::neuron::verify_statement(
                 request.subject,
                 request.statement,
                 &evidence
@@ -65,16 +65,16 @@ fn both_derivations_preserve_legacy_bytes_and_retry_after_reopen() {
     let mut f = Fixture::new();
     let (domain, domain_key) = domain(&mut f);
     let root = f.put(SecretInput::spell(WORDS, "").unwrap(), false);
-    let key = mudra::spell::cosmos_key(WORDS, "").unwrap();
+    let key = neuron_auth::spell::cosmos_key(WORDS, "").unwrap();
     let cosmos = SignRequest {
         key: NeuronKeyRef {
             root,
             derivation: Derivation::Cosmos {
-                path: mudra::spell::COSMOS_PATH.into(),
+                path: neuron_auth::spell::COSMOS_PATH.into(),
                 hrp: "cosmos".into(),
             },
         },
-        subject: mudra::claim::neuron_of(&mudra::cosmos::compressed(key.verifying_key())),
+        subject: neuron_auth::claim::neuron_of(&neuron_auth::cosmos::compressed(key.verifying_key())),
         statement: [8; 32],
     };
     for (signing, key) in [(domain, domain_key), (cosmos, key)] {
@@ -138,7 +138,7 @@ fn wrong_subject_kind_profile_and_denied_prepare_do_not_commit() {
     ));
     let mut bad = signing.clone();
     bad.key.derivation = Derivation::Cosmos {
-        path: mudra::spell::COSMOS_PATH.into(),
+        path: neuron_auth::spell::COSMOS_PATH.into(),
         hrp: "neuron".into(),
     };
     assert!(matches!(

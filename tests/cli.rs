@@ -87,12 +87,12 @@ fn process_restart_spell_derivation_replication_and_recovery() {
         );
     }
     let derived = c.ok(&["derive-neuron", id, "--hrp", "bostrom"], &[UNLOCK]);
-    let key = mudra::spell::cosmos_key(WORDS, "").unwrap();
-    let public = mudra::cosmos::compressed(key.verifying_key());
+    let key = neuron_auth::spell::cosmos_key(WORDS, "").unwrap();
+    let public = neuron_auth::cosmos::compressed(key.verifying_key());
     assert_eq!(derived["result"]["public_key"], hex::encode(public));
     assert_eq!(
         derived["result"]["address"],
-        mudra::cosmos::address(&public, "bostrom").unwrap()
+        neuron_auth::cosmos::address(&public, "bostrom").unwrap()
     );
     c.ok(&["checkpoint", "--out", &c.path("checkpoint")], &[UNLOCK]);
     let before = std::fs::read(c.home.join("host.json")).unwrap();
@@ -240,8 +240,8 @@ fn sign_and_embedded_signer_share_custody_retries_and_exclusive_lock() {
         &[UNLOCK, WORDS, ""],
     );
     let id = added["id"].as_str().unwrap();
-    let key = mudra::spell::cosmos_key(WORDS, "").unwrap();
-    let subject = mudra::claim::neuron_of(&mudra::cosmos::compressed(key.verifying_key()));
+    let key = neuron_auth::spell::cosmos_key(WORDS, "").unwrap();
+    let subject = neuron_auth::claim::neuron_of(&neuron_auth::cosmos::compressed(key.verifying_key()));
     let neuron = hex::encode(subject);
     let statement = hex::encode([8; 32]);
     let request = hex::encode([7; 32]);
@@ -272,7 +272,7 @@ fn sign_and_embedded_signer_share_custody_retries_and_exclusive_lock() {
     }
     let first = c.ok(&args, &[UNLOCK]);
     let signature = hex::decode(first["result"]["signature"].as_str().unwrap()).unwrap();
-    assert!(mudra::neuron::verify_statement(
+    assert!(neuron_auth::neuron::verify_statement(
         subject, [8; 32], &signature
     ));
     let retry = c.ok(&args, &[UNLOCK]);
@@ -296,7 +296,7 @@ fn sign_and_embedded_signer_share_custody_retries_and_exclusive_lock() {
     let reference = vault::NeuronKeyRef {
         root: vault::SecretRef(hex::decode(id).unwrap().try_into().unwrap()),
         derivation: vault::Derivation::Cosmos {
-            path: mudra::spell::COSMOS_PATH.into(),
+            path: neuron_auth::spell::COSMOS_PATH.into(),
             hrp: "bostrom".into(),
         },
     };
