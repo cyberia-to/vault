@@ -144,7 +144,7 @@ fn derive_neuron_preserves_mudra_bridge_and_domain_public_bytes() {
         NeuronKeyRef {
             root: spell,
             derivation: Derivation::Cosmos {
-                path: mudra::spell::COSMOS_PATH.into(),
+                path: neuron_auth::spell::COSMOS_PATH.into(),
                 hrp: "cosmos".into(),
             },
         },
@@ -159,12 +159,12 @@ fn derive_neuron_preserves_mudra_bridge_and_domain_public_bytes() {
     for profile in profiles {
         let (expected_public, expected_address) = match &profile.derivation {
             Derivation::Cosmos { hrp, .. } => {
-                let key = mudra::spell::cosmos_key(words, "").unwrap();
-                let pk = mudra::cosmos::compressed(key.verifying_key());
-                (pk, mudra::cosmos::address(&pk, hrp).unwrap())
+                let key = neuron_auth::spell::cosmos_key(words, "").unwrap();
+                let pk = neuron_auth::cosmos::compressed(key.verifying_key());
+                (pk, neuron_auth::cosmos::address(&pk, hrp).unwrap())
             }
             Derivation::Domain { domain, hrp } => {
-                let key = mudra::domain::DomainKey::derive(&[7; 32], domain, hrp).unwrap();
+                let key = neuron_auth::domain::DomainKey::derive(&[7; 32], domain, hrp).unwrap();
                 (key.pubkey, key.bech32)
             }
         };
@@ -187,7 +187,7 @@ fn derive_neuron_preserves_mudra_bridge_and_domain_public_bytes() {
                 assert_eq!(key, profile);
                 assert_eq!(public_key, expected_public);
                 assert_eq!(address, expected_address);
-                assert_eq!(subject, mudra::claim::neuron_of(&expected_public));
+                assert_eq!(subject, neuron_auth::claim::neuron_of(&expected_public));
                 Ok(())
             })
             .unwrap();

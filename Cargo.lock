@@ -465,21 +465,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "cyber-mudra"
-version = "0.1.0"
-dependencies = [
- "base64",
- "bech32",
- "bip32",
- "bip39",
- "cyber-hemera",
- "k256",
- "neuron-id",
- "ripemd",
- "sha2",
-]
-
-[[package]]
 name = "cyber-nox"
 version = "0.3.0"
 dependencies = [
@@ -518,12 +503,12 @@ dependencies = [
  "chacha20poly1305",
  "clap",
  "cyber-hemera",
- "cyber-mudra",
  "cybergraph",
  "data-encoding",
  "getrandom 0.2.17",
  "hex",
  "hmac",
+ "neuron-auth",
  "rpassword",
  "rustix",
  "serde",
@@ -1001,6 +986,21 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d1219ed1b7f229ee7104d281dd01d6802fe28bb6e95d292942c4daacdeb798c0"
 dependencies = [
  "libc",
+]
+
+[[package]]
+name = "neuron-auth"
+version = "0.1.0"
+dependencies = [
+ "base64",
+ "bech32",
+ "bip32",
+ "bip39",
+ "cyber-hemera",
+ "k256",
+ "neuron-id",
+ "ripemd",
+ "sha2",
 ]
 
 [[package]]

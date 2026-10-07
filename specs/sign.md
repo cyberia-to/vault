@@ -6,7 +6,7 @@ returns `PendingUse`. `SignRequest` binds the exact `NeuronKeyRef`, native
 domain-root/domain derivations are supported. The key must own the requested
 subject. No private key or root is returned to the caller.
 
-The signature profile is Mudra's existing [NSIG1](../../mudra/specs/neuron-auth.md):
+The signature profile is Mudra's existing [NSIG1](../../neuron/specs/local-authority.md):
 `NSIG1 || compressed_public_key[33] || ADR036_signature[64]`. The signed message
 is `cyber:neuron:authority:v1:` followed by the statement bytes; the ADR-036 signer
 always uses the literal `neuron` HRP. A key reference's address HRP does not change
