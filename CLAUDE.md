@@ -14,7 +14,7 @@ README.md is the product entry; specs/README.md indexes the contracts.
   physical durability; existing stack components own transport and consensus.
   Do not create competing permission, database or synchronization engines.
 - Never inspect or import real user secrets for development. Use synthetic
-  fixtures. No seed, key, password, token, plaintext database or recovery kit
+  fixtures. No spell, key, password, token, plaintext database or recovery kit
   belongs in Git, logs, command arguments or model context.
 - Local durability, replica acknowledgement, current availability and recovery
   freshness are distinct claims. Pin the evidence and revision for each claim.

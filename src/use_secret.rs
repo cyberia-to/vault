@@ -61,39 +61,53 @@ pub(crate) fn perform(entry: &mut Entry, operation: &Operation, now: u64) -> Res
             *used |= 1u64 << i;
             Ok(Output::Secret(values[i].clone()))
         }
-        Operation::DeriveNeuron(key) => {
-            let Payload::Bytes(kind, bytes) = &entry.input.0 else {
-                return Err(Error::Denied);
-            };
-            let (public_key, address) = match (&key.derivation, kind) {
-                (Derivation::Cosmos { path, hrp }, SecretKind::Bip39Seed) => {
-                    let seed = Zeroizing::new(
-                        <[u8; 64]>::try_from(bytes.as_slice()).map_err(|_| Error::Corrupt)?,
-                    );
-                    let signing =
-                        mudra::seed::signing_key(&seed, path).map_err(|_| Error::InvalidInput)?;
-                    let public = mudra::cosmos::compressed(signing.verifying_key());
-                    let address =
-                        mudra::cosmos::address(&public, hrp).map_err(|_| Error::InvalidInput)?;
-                    (public, address)
-                }
-                (Derivation::Domain { domain, hrp }, SecretKind::DomainRoot) => {
-                    let entropy = Zeroizing::new(
-                        <[u8; 32]>::try_from(bytes.as_slice()).map_err(|_| Error::Corrupt)?,
-                    );
-                    let derived = mudra::domain::DomainKey::derive(&entropy, domain, hrp)
-                        .map_err(|_| Error::InvalidInput)?;
-                    (derived.pubkey, derived.bech32)
-                }
-                _ => return Err(Error::Denied),
-            };
+        Operation::DeriveNeuron(key) => with_key(entry, &key.derivation, |signing, address| {
+            let public_key = mudra::cosmos::compressed(signing.verifying_key());
             Ok(Output::Neuron {
                 key: key.clone(),
                 subject: mudra::claim::neuron_of(&public_key),
                 public_key,
                 address,
             })
+        }),
+        Operation::Sign(request) => with_key(entry, &request.key.derivation, |signing, _| {
+            let evidence = mudra::neuron::sign(signing, request.subject, request.statement)
+                .map_err(|_| Error::Denied)?;
+            Ok(Output::Signature {
+                request: request.clone(),
+                evidence,
+            })
+        }),
+    }
+}
+
+/// The callback is private to custody; callers never receive a signing key.
+fn with_key(
+    entry: &Entry,
+    derivation: &Derivation,
+    action: impl FnOnce(&mudra::SigningKey, String) -> Result<Output>,
+) -> Result<Output> {
+    let Payload::Bytes(kind, bytes) = &entry.input.0 else {
+        return Err(Error::Denied);
+    };
+    match (derivation, kind) {
+        (Derivation::Cosmos { path, hrp }, SecretKind::Spell) => {
+            let spell =
+                Zeroizing::new(<[u8; 64]>::try_from(bytes.as_slice()).map_err(|_| Error::Corrupt)?);
+            let signing =
+                mudra::spell::signing_key(&spell, path).map_err(|_| Error::InvalidInput)?;
+            let public = mudra::cosmos::compressed(signing.verifying_key());
+            let address = mudra::cosmos::address(&public, hrp).map_err(|_| Error::InvalidInput)?;
+            action(&signing, address)
         }
+        (Derivation::Domain { domain, hrp }, SecretKind::DomainRoot) => {
+            let entropy =
+                Zeroizing::new(<[u8; 32]>::try_from(bytes.as_slice()).map_err(|_| Error::Corrupt)?);
+            let derived = mudra::domain::DomainKey::derive(&entropy, domain, hrp)
+                .map_err(|_| Error::InvalidInput)?;
+            action(derived.signing_key(), derived.bech32.clone())
+        }
+        _ => Err(Error::Denied),
     }
 }
 

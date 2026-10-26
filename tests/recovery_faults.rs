@@ -87,7 +87,7 @@ fn independent_factor_restores_after_loss_of_primary_and_one_replica() {
     );
     f.put(SecretInput::generate_domain_root().unwrap(), false);
     f.put(
-        SecretInput::mnemonic(
+        SecretInput::spell(
             "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about",
             "",
         )

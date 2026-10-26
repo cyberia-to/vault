@@ -63,7 +63,7 @@ production Ward. Test adapters exist only in tests and the synthetic example.
    variables, diagnostics or an agent conversation.
 2. Call `Vault::create`. Retain the vault locator, exact returned `Revision`,
    recovery factor and replica locators independently of the working store. An
-   ordinary neuron seed does not reconstruct externally chosen credentials.
+   ordinary neuron spell does not reconstruct externally chosen credentials.
 3. Construct typed `SecretInput` values in zeroizing owned buffers and call
    `put`. Store only the resulting `SecretRef` in ordinary clients. Replacement
    requires the expected entry version and cannot change its secret kind.
@@ -84,7 +84,7 @@ bounded responses, continuing after the last returned SecretRef until the page
 is empty. `inspect` explicitly collects the complete visible catalog. `lock`
 drops the library's keys and in-memory catalog index; encrypted copy operations
 do not require unlocking. Entry payloads are decrypted on demand.
-Neither root seeds nor derived private keys have an export/getter operation.
+Neither root spells nor derived private keys have an export/getter operation.
 
 ## Reopen, retry and recover
 

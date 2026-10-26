@@ -19,17 +19,19 @@ unqualified cryptographic parameters.
 | [Architecture](architecture.md) | Owners, dependencies, trust boundaries and initial deployment profile |
 | [Secrets](secrets.md) | Record types, allowed uses, disclosure and `derive_neuron` |
 | [Authorization](authorization.md) | Ward decisions, protected operations, retries and revocation |
+| [Signing](sign.md) | Native `sign`, exact NSIG1 compatibility and durable signature release |
 | [Storage](storage.md) | Sealed records, complete revisions and durable acknowledgement |
 | [Synchronization](synchronization.md) | Replicas, device roles, writer epochs, conflicts and retention |
 | [Recovery](recovery.md) | Independent recovery material, freshness and loss scenarios |
 | [Conformance](conformance.md) | Cross-stack acceptance gates and release evidence |
 | [Local custody profile](local-profile.md) | Bounded library format, cryptographic parameters and trusted-host assumptions |
+| [Local CLI](cli.md) | Operator commands, secret entry, retained anchors, retries and read-only recovery |
 
 ## Fixed decisions
 
 1. Vault has its own repository and reusable component boundary. Shipping it
    does not require another user-facing binary or a second protocol subject.
-2. Seeds, private keys and imported credentials share a typed custody service;
+2. Spells, private keys and imported credentials share a typed custody service;
    their use and disclosure policies differ.
 3. Records, metadata and protected-use state have durable encrypted storage.
    Derivation cannot reconstruct externally chosen secrets or lost history.

@@ -1,0 +1,985 @@
+diff --git a/Cargo.lock b/Cargo.lock
+index cf353a0..eba4f21 100644
+--- a/Cargo.lock
++++ b/Cargo.lock
+@@ -4,0 +5,10 @@ version = 4
++[[package]]
++name = "aead"
++version = "0.5.2"
++source = "registry+https://github.com/rust-lang/crates.io-index"
++checksum = "d122413f284cf2d62fb1b7db97e02edb8cda96d769b16e443a4f6195e35662b0"
++dependencies = [
++ "crypto-common",
++ "generic-array",
++]
++
+@@ -69,0 +80,19 @@ checksum = "330a5ed07fa54e4702c9d6c4174f74427fc0ef6e214bbd677ae50a5099946470"
++[[package]]
++name = "argon2"
++version = "0.5.3"
++source = "registry+https://github.com/rust-lang/crates.io-index"
++checksum = "3c3610892ee6e0cbce8ae2700349fcf8f98adb0dbfbee85aec3c9179d29cc072"
++dependencies = [
++ "base64ct",
++ "blake2",
++ "cpufeatures",
++ "password-hash",
++ "zeroize",
++]
++
++[[package]]
++name = "arrayvec"
++version = "0.7.8"
++source = "registry+https://github.com/rust-lang/crates.io-index"
++checksum = "d3fb67a6e08acf24fdeccbac2cb6ac4305825bd1f117462e0e6f2f193345ad56"
++
+@@ -107,0 +137,41 @@ checksum = "32637268377fc7b10a8c6d51de3e7fba1ce5dd371a96e342b34e6078db558e7f"
++[[package]]
++name = "bip32"
++version = "0.5.3"
++source = "registry+https://github.com/rust-lang/crates.io-index"
++checksum = "db40d3dfbeab4e031d78c844642fa0caa0b0db11ce1607ac9d2986dff1405c69"
++dependencies = [
++ "bs58",
++ "hmac",
++ "k256",
++ "once_cell",
++ "pbkdf2",
++ "rand_core 0.6.4",
++ "ripemd",
++ "secp256k1",
++ "sha2",
++ "subtle",
++ "zeroize",
++]
++
++[[package]]
++name = "bip39"
++version = "2.2.2"
++source = "registry+https://github.com/rust-lang/crates.io-index"
++checksum = "90dbd31c98227229239363921e60fcf5e558e43ec69094d46fc4996f08d1d5bc"
++dependencies = [
++ "bitcoin_hashes",
++ "rand 0.8.8",
++ "rand_core 0.6.4",
++ "serde",
++ "unicode-normalization",
++]
++
++[[package]]
++name = "bitcoin_hashes"
++version = "0.14.101"
++source = "registry+https://github.com/rust-lang/crates.io-index"
++checksum = "bca4c7abb40c8817d77403c880988cfd484f23ab2365726afb2f798363e2c4a2"
++dependencies = [
++ "hex-conservative",
++]
++
+@@ -113,0 +184,9 @@ checksum = "3ded4057c258ba199e2d26386d3af3780957ecaee6c4ef4041c6b4b8b97c0b06"
++[[package]]
++name = "blake2"
++version = "0.10.6"
++source = "registry+https://github.com/rust-lang/crates.io-index"
++checksum = "46502ad458c9a52b69d4d4d32775c788b7a1b85e8bc9d482d92250fc0e3f8efe"
++dependencies = [
++ "digest",
++]
++
+@@ -122,0 +202,9 @@ dependencies = [
++[[package]]
++name = "bs58"
++version = "0.5.1"
++source = "registry+https://github.com/rust-lang/crates.io-index"
++checksum = "bf88ba1141d185c399bee5288d850d63b8369520c1eafc32a0430b5b6c287bf4"
++dependencies = [
++ "sha2",
++]
++
+@@ -140,0 +229,10 @@ checksum = "6236364b88b9b6d0bc181ba374cf1ab55ba3ef97a1cb6f8cddad48a273767fb5"
++[[package]]
++name = "cc"
++version = "1.4.6"
++source = "registry+https://github.com/rust-lang/crates.io-index"
++checksum = "a3eb0f42d6c360dc3f8a821f6bf2fdea7f72bfd36b3076eb0e6d1e9e0752fff4"
++dependencies = [
++ "find-msvc-tools",
++ "shlex",
++]
++
+@@ -146,0 +245,35 @@ checksum = "9330f8b2ff13f34540b44e946ef35111825727b38d33286ef986142615121801"
++[[package]]
++name = "chacha20"
++version = "0.9.1"
++source = "registry+https://github.com/rust-lang/crates.io-index"
++checksum = "c3613f74bd2eac03dad61bd53dbe620703d4371614fe0bc3b9f04dd36fe4e818"
++dependencies = [
++ "cfg-if",
++ "cipher",
++ "cpufeatures",
++]
++
++[[package]]
++name = "chacha20poly1305"
++version = "0.10.1"
++source = "registry+https://github.com/rust-lang/crates.io-index"
++checksum = "10cd79432192d1c0f4e1a0fef9527696cc039165d729fb41b3f4f4f354c2dc35"
++dependencies = [
++ "aead",
++ "chacha20",
++ "cipher",
++ "poly1305",
++ "zeroize",
++]
++
++[[package]]
++name = "cipher"
++version = "0.4.4"
++source = "registry+https://github.com/rust-lang/crates.io-index"
++checksum = "773f3b9af64447d2ce9850330c473515014aa235e6a783b02db81ff39e4a3dad"
++dependencies = [
++ "crypto-common",
++ "inout",
++ "zeroize",
++]
++
+@@ -257,0 +391 @@ dependencies = [
++ "rand_core 0.6.4",
+@@ -339,0 +474,2 @@ dependencies = [
++ "bip32",
++ "bip39",
+@@ -357,7 +492,0 @@ dependencies = [
+-[[package]]
+-name = "cyber-tape"
+-version = "0.1.0"
+-dependencies = [
+- "bytes",
+-]
+-
+@@ -384,0 +514,23 @@ dependencies = [
++[[package]]
++name = "cyber-vault"
++version = "0.1.0"
++dependencies = [
++ "argon2",
++ "chacha20poly1305",
++ "cyber-hemera",
++ "cyber-mudra",
++ "cybergraph",
++ "getrandom 0.2.17",
++ "hex",
++ "hmac",
++ "rpassword",
++ "rustix",
++ "serde",
++ "serde_json",
++ "sha1",
++ "sha2",
++ "subtle",
++ "tempfile",
++ "zeroize",
++]
++
+@@ -524,0 +677,6 @@ dependencies = [
++[[package]]
++name = "find-msvc-tools"
++version = "0.1.12"
++source = "registry+https://github.com/rust-lang/crates.io-index"
++checksum = "3e0f1c7c3a72c66fd80abe965175f7523475c0489a87d3ff9d6e8c87d87a9d2d"
++
+@@ -549 +706,0 @@ dependencies = [
+- "cyber-tape",
+@@ -552 +709 @@ dependencies = [
+- "rand",
++ "rand 0.9.5",
+@@ -555,0 +713 @@ dependencies = [
++ "tade",
+@@ -569,0 +728,11 @@ dependencies = [
++[[package]]
++name = "getrandom"
++version = "0.2.17"
++source = "registry+https://github.com/rust-lang/crates.io-index"
++checksum = "ff2abc00be7fca6ebc474524697ae276ad847ad0a6b3faa4bcb027e9a4614ad0"
++dependencies = [
++ "cfg-if",
++ "libc",
++ "wasi",
++]
++
+@@ -622,0 +792,15 @@ checksum = "2304e00983f87ffb38b55b444b5e3b60a884b5d30c0fca7d82fe33449bbe55ea"
++[[package]]
++name = "hex"
++version = "0.4.3"
++source = "registry+https://github.com/rust-lang/crates.io-index"
++checksum = "7f24254aa9a54b5c858eaee2f5bccdb46aaf0e486a595ed5fd8f86ba55232a70"
++
++[[package]]
++name = "hex-conservative"
++version = "0.2.3"
++source = "registry+https://github.com/rust-lang/crates.io-index"
++checksum = "db3fef046dca3ca91ee1408a8c1b80ab777e80a4d308d1bf4e7adb3fcb047e08"
++dependencies = [
++ "arrayvec",
++]
++
+@@ -689,0 +874,9 @@ dependencies = [
++[[package]]
++name = "inout"
++version = "0.1.4"
++source = "registry+https://github.com/rust-lang/crates.io-index"
++checksum = "879f10e63c20629ecabbb64a8010319738c66a5cd0c29b02d63d272b03751d01"
++dependencies = [
++ "generic-array",
++]
++
+@@ -801 +994,2 @@ dependencies = [
+- "getrandom",
++ "cyber-vault",
++ "getrandom 0.3.4",
+@@ -807,0 +1002 @@ dependencies = [
++ "tempfile",
+@@ -836,0 +1032 @@ dependencies = [
++ "cyber-vault",
+@@ -868,0 +1065,6 @@ checksum = "384b8ab6d37215f3c5301a95a4accb5d64aa607f1fcb26a11b5303878451b4fe"
++[[package]]
++name = "opaque-debug"
++version = "0.3.1"
++source = "registry+https://github.com/rust-lang/crates.io-index"
++checksum = "c08d65885ee38876c4f86fa503fb49d7b507c2b62552df7c70b2fce627e06381"
++
+@@ -881,0 +1084,11 @@ dependencies = [
++[[package]]
++name = "password-hash"
++version = "0.5.0"
++source = "registry+https://github.com/rust-lang/crates.io-index"
++checksum = "346f04948ba92c43e8469c1ee6736c7563d71012b17d40745260fe106aac2166"
++dependencies = [
++ "base64ct",
++ "rand_core 0.6.4",
++ "subtle",
++]
++
+@@ -899,0 +1113,10 @@ dependencies = [
++[[package]]
++name = "pbkdf2"
++version = "0.12.2"
++source = "registry+https://github.com/rust-lang/crates.io-index"
++checksum = "f8ed6a7761f76e3b9f92dfb0a60a6a6477c61024b775147ff0973a02653abaf2"
++dependencies = [
++ "digest",
++ "hmac",
++]
++
+@@ -909,0 +1133,11 @@ dependencies = [
++[[package]]
++name = "poly1305"
++version = "0.8.0"
++source = "registry+https://github.com/rust-lang/crates.io-index"
++checksum = "8159bd90725d2df49889a078b54f4f79e87f1f8a8444194cdca81d38f5393abf"
++dependencies = [
++ "cpufeatures",
++ "opaque-debug",
++ "universal-hash",
++]
++
+@@ -952,0 +1187,11 @@ checksum = "69cdb34c158ceb288df11e18b4bd39de994f6657d83847bdffdbd7f346754b0f"
++[[package]]
++name = "rand"
++version = "0.8.8"
++source = "registry+https://github.com/rust-lang/crates.io-index"
++checksum = "e058c7de0b26af77780c769414d6257830bb240f3c38477dbc2c16e5f54d6d4c"
++dependencies = [
++ "libc",
++ "rand_chacha 0.3.1",
++ "rand_core 0.6.4",
++]
++
+@@ -959 +1204 @@ dependencies = [
+- "rand_chacha",
++ "rand_chacha 0.9.0",
+@@ -962,0 +1208,10 @@ dependencies = [
++[[package]]
++name = "rand_chacha"
++version = "0.3.1"
++source = "registry+https://github.com/rust-lang/crates.io-index"
++checksum = "e6c10a63a0fa32252be49d21e7709d4d4baf8d231c2dbce1eaa8141b9b127d88"
++dependencies = [
++ "ppv-lite86",
++ "rand_core 0.6.4",
++]
++
+@@ -977,0 +1233,3 @@ checksum = "ec0be4795e2f6a28069bec0b5ff3e2ac9bafc99e6a9a7dc3547996c5c816922c"
++dependencies = [
++ "getrandom 0.2.17",
++]
+@@ -985 +1243 @@ dependencies = [
+- "getrandom",
++ "getrandom 0.3.4",
+@@ -1053,0 +1312,21 @@ dependencies = [
++[[package]]
++name = "rpassword"
++version = "7.5.4"
++source = "registry+https://github.com/rust-lang/crates.io-index"
++checksum = "2da316a15f47e3d053de9cb2c439650bd8fa4aaeb9365f2e5f27f492ff73c196"
++dependencies = [
++ "libc",
++ "rtoolbox",
++ "windows-sys",
++]
++
++[[package]]
++name = "rtoolbox"
++version = "0.0.6"
++source = "registry+https://github.com/rust-lang/crates.io-index"
++checksum = "9a1efe12a1469752d0e6ff5ebec0b6ef4924cc5c4c71046b0ec730040535819d"
++dependencies = [
++ "libc",
++ "windows-sys",
++]
++
+@@ -1143,0 +1423,18 @@ dependencies = [
++[[package]]
++name = "secp256k1"
++version = "0.27.0"
++source = "registry+https://github.com/rust-lang/crates.io-index"
++checksum = "25996b82292a7a57ed3508f052cfff8640d38d32018784acd714758b43da9c8f"
++dependencies = [
++ "secp256k1-sys",
++]
++
++[[package]]
++name = "secp256k1-sys"
++version = "0.8.2"
++source = "registry+https://github.com/rust-lang/crates.io-index"
++checksum = "4473013577ec77b4ee3668179ef1186df3146e2cf2d927bd200974c6fe60fd99"
++dependencies = [
++ "cc",
++]
++
+@@ -1201,0 +1499,11 @@ dependencies = [
++[[package]]
++name = "sha1"
++version = "0.10.7"
++source = "registry+https://github.com/rust-lang/crates.io-index"
++checksum = "a978451301f4db1d02937a4ab3ccce137717b81826e79b7d49ffe3244a13c3b8"
++dependencies = [
++ "cfg-if",
++ "cpufeatures",
++ "digest",
++]
++
+@@ -1212,0 +1521,6 @@ dependencies = [
++[[package]]
++name = "shlex"
++version = "2.0.1"
++source = "registry+https://github.com/rust-lang/crates.io-index"
++checksum = "f8fadd59c855ef2080decdef8ff161eb6661b86933c9d82e5ba29dc602a55aba"
++
+@@ -1346,0 +1661,7 @@ dependencies = [
++[[package]]
++name = "tade"
++version = "0.1.0"
++dependencies = [
++ "bytes",
++]
++
+@@ -1354 +1675 @@ dependencies = [
+- "getrandom",
++ "getrandom 0.3.4",
+@@ -1379,0 +1701,6 @@ dependencies = [
++[[package]]
++name = "tinyvec"
++version = "1.13.3"
++source = "registry+https://github.com/rust-lang/crates.io-index"
++checksum = "fd3ca314f692efd6c868f8408f53fe444634a845f96c028b97d35f6a1f79f0ee"
++
+@@ -1432,0 +1760,19 @@ checksum = "e6e4313cd5fcd3dad5cafa179702e2b244f760991f45397d14d4ebf38247da75"
++[[package]]
++name = "unicode-normalization"
++version = "0.1.25"
++source = "registry+https://github.com/rust-lang/crates.io-index"
++checksum = "5fd4f6878c9cb28d874b009da9e8d183b5abc80117c40bbd187a1fde336be6e8"
++dependencies = [
++ "tinyvec",
++]
++
++[[package]]
++name = "universal-hash"
++version = "0.5.1"
++source = "registry+https://github.com/rust-lang/crates.io-index"
++checksum = "fc1de2c688dc15305988b563c3854064043356019f97a4b46276fe734c4f07ea"
++dependencies = [
++ "crypto-common",
++ "subtle",
++]
++
+@@ -1467,0 +1814,6 @@ checksum = "0b928f33d975fc6ad9f86c8f283853ad26bdd5b10b7f1542aa2fa15e2289105a"
++[[package]]
++name = "wasi"
++version = "0.11.1+wasi-snapshot-preview1"
++source = "registry+https://github.com/rust-lang/crates.io-index"
++checksum = "ccf3ec651a847eb01de73ccad15eb7d99f80485de043efb2f370cd654f4ea44b"
++
+@@ -1537,0 +1890,14 @@ checksum = "e13c156562582aa81c60cb29407084cdb54c4164760106ab78e6c5b0858cf64e"
++dependencies = [
++ "zeroize_derive",
++]
++
++[[package]]
++name = "zeroize_derive"
++version = "1.5.0"
++source = "registry+https://github.com/rust-lang/crates.io-index"
++checksum = "3c50655cbb0fe3fc43170059e702f1ce5e19b84cec58dc87b037a09935c2f328"
++dependencies = [
++ "proc-macro2",
++ "quote",
++ "syn 2.0.119",
++]
+diff --git a/README.md b/README.md
+index 4edc78a..7b9f8dc 100644
+--- a/README.md
++++ b/README.md
+@@ -47,0 +48,14 @@ A key is created only by the explicit keygen command, which refuses an existing
++For encrypted custody, select an existing Vault with two configured replicas:
++
++```nu
++let opts = [--store demo.bbg --vault-home /path/to/vault --vault-root ENTRY_ID]
++./target/debug/neuron ...$opts activate
++```
++
++Vault prompts for its unlock password. Add `--vault-domain example.test` for a
++domain-root entry; a spell uses the existing Cosmos path. Neuron receives public
++credentials and signatures; Vault retains the root and performs `sign` after
++authorization and durable replication. The `--key-file` path above remains an
++explicit legacy adapter, mutually exclusive with encrypted custody. Neither mode
++is selected as a fallback when the other fails. See [local authority](specs/local-authority.md).
++
+diff --git a/node/Cargo.toml b/node/Cargo.toml
+index e2d1a65..fad0ccf 100644
+--- a/node/Cargo.toml
++++ b/node/Cargo.toml
+@@ -13,0 +14 @@ inf-value = { path = "../../inf/rs/value", optional = true }
++vault = { package = "cyber-vault", path = "../../vault", default-features = false, features = ["local-host"], optional = true }
+@@ -15,0 +17 @@ inf-value = { path = "../../inf/rs/value", optional = true }
++vault = ["dep:vault"]
+diff --git a/node/src/lib.rs b/node/src/lib.rs
+index 18a61fd..85ece1c 100644
+--- a/node/src/lib.rs
++++ b/node/src/lib.rs
+@@ -3,0 +4,2 @@ pub mod authority;
++#[cfg(feature = "vault")]
++pub mod custody;
+diff --git a/node/src/authority.rs b/node/src/authority.rs
+index d0c0c40..d94ce5e 100644
+--- a/node/src/authority.rs
++++ b/node/src/authority.rs
+@@ -13 +13 @@ pub trait SigningVault: Send + Sync {
+-    fn sign_statement(&self, subject: NeuronId, statement: Particle) -> Result<Vec<u8>, Error>;
++    fn sign(&self, subject: NeuronId, statement: Particle) -> Result<Vec<u8>, Error>;
+@@ -27,2 +27,2 @@ impl SigningVault for KeyVault {
+-    fn sign_statement(&self, subject: NeuronId, statement: Particle) -> Result<Vec<u8>, Error> {
+-        mudra::neuron::sign_statement(&self.key, subject, statement).map_err(|_| Error::Denied)
++    fn sign(&self, subject: NeuronId, statement: Particle) -> Result<Vec<u8>, Error> {
++        mudra::neuron::sign(&self.key, subject, statement).map_err(|_| Error::Denied)
+@@ -94 +94 @@ impl<V: SigningVault> Authority for LocalAuthority<V> {
+-        let evidence = self.vault.sign_statement(action.neuron, action.statement)?;
++        let evidence = self.vault.sign(action.neuron, action.statement)?;
+diff --git a/specs/local-authority.md b/specs/local-authority.md
+index a391f9c..f82e1f4 100644
+--- a/specs/local-authority.md
++++ b/specs/local-authority.md
+@@ -5 +5,9 @@ profile. It does not reinterpret that ID as the proof-native `H(secret)` profile
+-Vault owns the signing key behind an opaque host object. Ward holds a bounded
++Vault owns the signing key behind an opaque host object. `SigningVault::sign`
++is the host port. With the `vault` feature, `custody::LocalVault` wraps
++`vault::local::Signer`: encrypted Cybergraph/BBG custody, retained checkpoints,
++OS-owner unlock, exact operations and two verified ciphertext replicas before
++signature release. The local action grant stays held for this whole call; the
++Vault owner adapter does not reacquire the action grant lock. This is a trusted
++local operator profile, not authenticated remote Ward delegation. `KeyVault`
++is the explicit raw-key compatibility/test adapter. No automatic fallback or
++migration between these custody modes is permitted. Ward holds a bounded
+@@ -18 +26 @@ The existing mudra ADR-036 signing/verification functions define canonical JSON.
+-No seed, mnemonic, signing key or live grant handle is graph content.
++No spell, signing key or live grant handle is graph content.
+diff --git a/cli/Cargo.toml b/cli/Cargo.toml
+index 7a2afa0..2512803 100644
+--- a/cli/Cargo.toml
++++ b/cli/Cargo.toml
+@@ -12 +12 @@ neuron-engine.workspace = true
+-neuron-node.workspace = true
++neuron-node = { workspace = true, features = ["vault"] }
+@@ -17,0 +18 @@ mudra = { package = "cyber-mudra", path = "../../mudra", default-features = fals
++vault = { package = "cyber-vault", path = "../../vault", default-features = false, features = ["local-host"] }
+@@ -21,0 +23,3 @@ legacy-redb-migration = ["neuron-node/legacy-redb-migration"]
++[dev-dependencies]
++tempfile = "3"
++
+diff --git a/cli/src/main.rs b/cli/src/main.rs
+index ea2e0e0..c8be2c3 100644
+--- a/cli/src/main.rs
++++ b/cli/src/main.rs
+@@ -1,0 +2 @@ mod archive;
++mod custody;
+@@ -23,2 +24,2 @@ struct Args {
+-    #[arg(long, global = true)]
+-    key_file: Option<PathBuf>,
++    #[command(flatten)]
++    custody: custody::Selection,
+@@ -220,2 +221,2 @@ impl Command {
+-type Result<T> = std::result::Result<T, Box<dyn std::error::Error>>;
+-struct CliAuthority(Option<LocalAuthority<KeyVault>>);
++type Result<T> = std::result::Result<T, Box<dyn std::error::Error + Send + Sync>>;
++struct CliAuthority(Option<LocalAuthority<custody::Custody>>);
+@@ -505 +506 @@ fn execute(args: Args) -> Result<Value> {
+-            let vault = key(args.key_file.as_deref().ok_or("select --key-file")?)?;
++            let vault = args.custody.open()?.ok_or("select --vault-home and --vault-root (or legacy --key-file)")?;
+@@ -555,2 +556 @@ fn execute(args: Args) -> Result<Value> {
+-    let authority = if let Some(path) = args.key_file {
+-        let vault = key(&path)?;
++    let authority = if let Some(vault) = args.custody.open()? {
+@@ -579 +579 @@ fn execute(args: Args) -> Result<Value> {
+-            let id = subject.ok_or("activate requires --key-file")?;
++            let id = subject.ok_or("activate requires --vault-home and --vault-root (or legacy --key-file)")?;
+diff --git a/specs/cli.md b/specs/cli.md
+index 3c0f4c7..25c9e14 100644
+--- a/specs/cli.md
++++ b/specs/cli.md
+@@ -16 +16,12 @@ mudra H(compressed_pubkey), never a program installation hash.
+-`--key-file FILE` selects vault custody. `--network ID` pins a network explicitly;
++`--vault-home DIR --vault-root ID` selects the encrypted Vault and its spell entry.
++`--vault-path PATH` selects a Cosmos path; `--vault-domain DOMAIN` instead selects
++a domain-root entry. `--vault-hrp HRP` is address formatting, not a new signing
++profile. Vault prompts for its unlock password directly; `--vault-secrets-stdin`
++explicitly selects a trusted pipe. Two replicas must already be configured with
++the Vault CLI. All signing uses the shared Vault host journal and custody API;
++Neuron receives only public credentials and NSIG1 evidence. The process retains
++the exclusive Vault host lock while using its signer.
++
++`--key-file FILE` selects the explicit legacy raw-key adapter, mutually exclusive
++with Vault selection. An unavailable/locked Vault never falls back to it.
++`--network ID` pins a network explicitly;
+diff --git a/node/src/custody.rs b/node/src/custody.rs
+new file mode 100644
+index 0000000..4890eac
+--- /dev/null
++++ b/node/src/custody.rs
+@@ -0,0 +1,31 @@
++//! Local-operator Vault custody. LocalAuthority holds its action grant through sign.
++use crate::SigningVault;
++use neuron_engine::Error;
++use neuron_model::{NeuronId, Particle};
++use std::sync::Mutex;
++
++pub struct LocalVault {
++    subject: NeuronId,
++    signer: Mutex<vault::local::Signer>,
++}
++impl LocalVault {
++    pub fn new(signer: vault::local::Signer) -> Self {
++        Self {
++            subject: signer.subject(),
++            signer: Mutex::new(signer),
++        }
++    }
++}
++impl SigningVault for LocalVault {
++    fn subject(&self) -> NeuronId {
++        self.subject
++    }
++    fn sign(&self, subject: NeuronId, statement: Particle) -> Result<Vec<u8>, Error> {
++        if subject != self.subject {
++            return Err(Error::Denied);
++        }
++        let mut signer = self.signer.lock().map_err(|_| Error::Denied)?;
++        let request = vault::RequestId::random().map_err(|_| Error::Denied)?;
++        signer.sign(request, statement).map_err(|_| Error::Denied)
++    }
++}
+diff --git a/node/tests/support/vault.rs b/node/tests/support/vault.rs
+new file mode 100644
+index 0000000..56cf1e0
+--- /dev/null
++++ b/node/tests/support/vault.rs
+@@ -0,0 +1,77 @@
++#![allow(dead_code)]
++use std::path::{Path, PathBuf};
++use vault::local::{
++    Signer,
++    host::{Host, ReplicaConfig},
++    owner::{Grant, Owner},
++};
++use vault::{Derivation, Entry, NeuronKeyRef, RequestId, SecretInput, SecretRef, Vault, VaultId};
++
++pub const PASSWORD: &str = "synthetic-vault-unlock";
++pub const ROOT: &str = "08080808080808080808080808080808";
++pub const DOMAIN: &str = "example.test";
++
++pub fn key() -> NeuronKeyRef {
++    NeuronKeyRef {
++        root: SecretRef([8; 16]),
++        derivation: Derivation::Domain {
++            domain: DOMAIN.into(),
++            hrp: "bostrom".into(),
++        },
++    }
++}
++pub fn create(directory: &Path) -> PathBuf {
++    let home = directory.join("vault");
++    let host = Host::open(&home, true).unwrap();
++    let mut state = host.state().unwrap();
++    let ward = Owner {
++        vault: VaultId(state.vault),
++        context: state.context(),
++        request: RequestId::random().unwrap(),
++        grant: Grant::Create,
++    };
++    let mut vault = Vault::create(
++        host.store.clone(),
++        ward.vault,
++        ward.request,
++        ward.context,
++        PASSWORD.as_bytes(),
++        &[9; 32],
++        &ward,
++    )
++    .unwrap();
++    host.settle(vault.revision()).unwrap();
++    let entry = Entry::new(
++        key().root,
++        "synthetic test".into(),
++        "neuron".into(),
++        ward.context.policy,
++        false,
++        SecretInput::generate_domain_root().unwrap(),
++    )
++    .unwrap();
++    let ward = Owner {
++        request: RequestId::random().unwrap(),
++        grant: Grant::Put(entry.info().clone()),
++        ..ward
++    };
++    vault
++        .put(ward.context, ward.request, entry, None, &ward)
++        .unwrap();
++    host.settle(vault.revision()).unwrap();
++    state = host.state().unwrap();
++    for (name, id) in [("replica-a", 1), ("replica-b", 2)] {
++        let path = directory.join(name);
++        vault::local::io::private_dir(&path).unwrap();
++        state.replicas.push(ReplicaConfig {
++            id: [id; 32],
++            path: path.canonicalize().unwrap(),
++            failure_domain: name.into(),
++        });
++    }
++    host.save(state).unwrap();
++    home
++}
++pub fn open(home: &Path) -> Signer {
++    Signer::open(home, key(), PASSWORD.as_bytes()).unwrap()
++}
+diff --git a/node/tests/vault_custody.rs b/node/tests/vault_custody.rs
+new file mode 100644
+index 0000000..dac0e89
+--- /dev/null
++++ b/node/tests/vault_custody.rs
+@@ -0,0 +1,89 @@
++#![cfg(feature = "vault")]
++#[path = "support/vault.rs"]
++mod fixture;
++mod support;
++use neuron_engine::{Authority, Error, GraphPort, Neuron, ProgramConfig};
++use neuron_model::{Lifecycle, Reader};
++use neuron_node::{Grant, GrantHandle, LocalAuthority, Rune, custody::LocalVault};
++use support::{Directory, NETWORK, POLICY};
++
++#[test]
++fn encrypted_custody_signs_real_transitions_and_revocation_stops_publication() {
++    let dir = Directory::new();
++    let home = fixture::create(&dir.0);
++    let signer = fixture::open(&home);
++    let id = signer.subject();
++    let grant = GrantHandle::new(Grant {
++        neuron: id,
++        network: NETWORK,
++        policy: POLICY,
++        epoch: 0,
++        revision: 0,
++        enabled: true,
++        acts: [].into(),
++        progs: None,
++    })
++    .unwrap();
++    let authority = LocalAuthority::new(LocalVault::new(signer), grant.clone()).unwrap();
++    let agent = Neuron::with_authority(dir.graph(), Rune, authority);
++    agent.activate(id, NETWORK, POLICY, 100_000).unwrap();
++    let prog = agent
++        .install(
++            id,
++            [6; 32],
++            b"event".to_vec(),
++            neuron_rune::value("0").unwrap(),
++            ProgramConfig {
++                step_limit: 1000,
++                max_inflight: 1,
++                allowed_acts: vec![],
++            },
++        )
++        .unwrap();
++    for head in agent.graph.history(id, None, 20).unwrap() {
++        let mut r = Reader::new(&agent.graph, 50_000);
++        let f = if head.index == 0 {
++            r.record(head.commit, "neuron/activation/1", 3).unwrap()
++        } else {
++            r.record(head.commit, "neuron/commit/1", 8).unwrap()
++        };
++        let auth = r.reference(f[if head.index == 0 { 2 } else { 7 }]).unwrap();
++        let f = r.record(auth, "neuron/authorization/1", 6).unwrap();
++        let statement = r.reference(f[4]).unwrap();
++        let evidence = r.reference(f[5]).unwrap();
++        // Evidence is a plain Blob; no spell/root/private-key is graph content.
++        let bytes = r.content(evidence).unwrap().bytes;
++        assert!(mudra::neuron::verify_statement(id, statement, &bytes));
++    }
++    let head = agent.graph.head(id).unwrap();
++    let mut next = grant.get().unwrap();
++    next.revision += 1;
++    next.enabled = false;
++    grant.replace(0, next).unwrap();
++    assert!(matches!(
++        agent.manage(id, prog, Lifecycle::Paused),
++        Err(Error::Denied)
++    ));
++    assert_eq!(agent.graph.head(id).unwrap(), head);
++    // The publication guard independently rejects a previously signed decision.
++    let action = neuron_engine::Action {
++        neuron: id,
++        network: NETWORK,
++        policy: POLICY,
++        epoch: 0,
++        prog: Some(prog),
++        invocation: None,
++        act: None,
++        kind: "pause",
++        statement: [1; 32],
++        allowed_acts: &[],
++    };
++    assert!(matches!(
++        agent
++            .authority
++            .with_current(&action, &mut || panic!("published")),
++        Err(Error::Denied)
++    ));
++    drop(agent);
++    assert_eq!(fixture::open(&home).subject(), id);
++}
+diff --git a/cli/src/custody.rs b/cli/src/custody.rs
+new file mode 100644
+index 0000000..4cb4731
+--- /dev/null
++++ b/cli/src/custody.rs
+@@ -0,0 +1,91 @@
++use crate::Result;
++use clap::Args;
++use neuron_model::{NeuronId, Particle};
++use neuron_node::{KeyVault, SigningVault, custody::LocalVault};
++use std::path::PathBuf;
++
++#[derive(Args)]
++pub struct Selection {
++    /// Explicit legacy raw-key custody (mutually exclusive with Vault).
++    #[arg(long, global = true, conflicts_with = "vault_home")]
++    pub key_file: Option<PathBuf>,
++    /// Encrypted Vault directory; configure its replicas with the Vault CLI.
++    #[arg(long, global = true, requires = "vault_root")]
++    vault_home: Option<PathBuf>,
++    /// Spell or domain-root entry ID (16-byte hex).
++    #[arg(long, global = true, requires = "vault_home")]
++    vault_root: Option<String>,
++    /// Cosmos derivation path; default m/44'/118'/0'/0/0.
++    #[arg(
++        long,
++        global = true,
++        requires = "vault_home",
++        conflicts_with = "vault_domain"
++    )]
++    vault_path: Option<String>,
++    /// Derive a domain-root entry for this domain.
++    #[arg(long, global = true, requires = "vault_home")]
++    vault_domain: Option<String>,
++    /// Display address prefix; does not change native signing bytes.
++    #[arg(long, global = true, requires = "vault_home")]
++    vault_hrp: Option<String>,
++    /// Read Vault unlock input from an explicitly trusted pipe.
++    #[arg(long, global = true, requires = "vault_home")]
++    vault_secrets_stdin: bool,
++}
++impl Selection {
++    pub fn open(&self) -> Result<Option<Custody>> {
++        if let Some(home) = &self.vault_home {
++            let root = self.vault_root.as_deref().ok_or("select --vault-root")?;
++            let hrp = self.vault_hrp.clone().unwrap_or_else(|| "bostrom".into());
++            let derivation = match &self.vault_domain {
++                Some(domain) => vault::Derivation::Domain {
++                    domain: domain.clone(),
++                    hrp,
++                },
++                None => vault::Derivation::Cosmos {
++                    path: self
++                        .vault_path
++                        .clone()
++                        .unwrap_or_else(|| mudra::spell::COSMOS_PATH.into()),
++                    hrp,
++                },
++            };
++            let key = vault::NeuronKeyRef {
++                root: vault::SecretRef(vault::local::io::array(root)?),
++                derivation,
++            };
++            let signer = vault::local::Signer::prompt_open(home, key, self.vault_secrets_stdin)?;
++            Ok(Some(Custody::Vault(Box::new(LocalVault::new(signer)))))
++        } else {
++            self.key_file
++                .as_deref()
++                .map(crate::key)
++                .transpose()
++                .map(|v| v.map(Custody::Legacy))
++        }
++    }
++}
++
++pub enum Custody {
++    Legacy(KeyVault),
++    Vault(Box<LocalVault>),
++}
++impl SigningVault for Custody {
++    fn subject(&self) -> NeuronId {
++        match self {
++            Self::Legacy(v) => v.subject(),
++            Self::Vault(v) => v.subject(),
++        }
++    }
++    fn sign(
++        &self,
++        subject: NeuronId,
++        statement: Particle,
++    ) -> std::result::Result<Vec<u8>, neuron_engine::Error> {
++        match self {
++            Self::Legacy(v) => v.sign(subject, statement),
++            Self::Vault(v) => v.sign(subject, statement),
++        }
++    }
++}
+diff --git a/cli/tests/vault.rs b/cli/tests/vault.rs
+new file mode 100644
+index 0000000..4608514
+--- /dev/null
++++ b/cli/tests/vault.rs
+@@ -0,0 +1,81 @@
++#[path = "../../node/tests/support/vault.rs"]
++mod fixture;
++use serde_json::Value;
++use std::{
++    io::Write,
++    path::Path,
++    process::{Command, Output, Stdio},
++};
++
++fn call(directory: &Path, args: &[&str], password: &str) -> Output {
++    let mut process = Command::new(env!("CARGO_BIN_EXE_neuron"))
++        .arg("--store")
++        .arg(directory.join("bbg"))
++        .arg("--vault-home")
++        .arg(directory.join("vault"))
++        .args([
++            "--vault-root",
++            fixture::ROOT,
++            "--vault-domain",
++            fixture::DOMAIN,
++            "--vault-secrets-stdin",
++        ])
++        .args(args)
++        .stdin(Stdio::piped())
++        .stdout(Stdio::piped())
++        .stderr(Stdio::piped())
++        .spawn()
++        .unwrap();
++    writeln!(process.stdin.take().unwrap(), "{password}").unwrap();
++    process.wait_with_output().unwrap()
++}
++fn ok(directory: &Path, args: &[&str]) -> Value {
++    let out = call(directory, args, fixture::PASSWORD);
++    assert!(
++        out.status.success(),
++        "{}",
++        String::from_utf8_lossy(&out.stderr)
++    );
++    assert!(!String::from_utf8_lossy(&out.stdout).contains(fixture::PASSWORD));
++    assert!(!String::from_utf8_lossy(&out.stderr).contains(fixture::PASSWORD));
++    serde_json::from_slice(&out.stdout).unwrap()
++}
++
++#[test]
++fn vault_backed_neuron_runs_across_processes_without_a_key_file() {
++    let dir = tempfile::tempdir().unwrap();
++    fixture::create(dir.path());
++    let active = ok(dir.path(), &["activate"]);
++    let neuron = active["neuron"].as_str().unwrap();
++    let source = dir.path().join("counter.rune");
++    std::fs::write(&source, "~mem + event").unwrap();
++    let installed = ok(
++        dir.path(),
++        &[
++            "install",
++            neuron,
++            source.to_str().unwrap(),
++            "--initial",
++            "0",
++        ],
++    );
++    let prog = installed["prog"].as_str().unwrap();
++    let nonce = "06".repeat(32);
++    let args = ["submit", neuron, prog, "7", "--nonce", &nonce];
++    let first = ok(dir.path(), &args);
++    assert_eq!(first["state"], "7");
++    let retry = ok(dir.path(), &args);
++    assert_eq!(first["admission_commit"], retry["admission_commit"]);
++    assert_eq!(retry["state"], "7");
++    let bad = call(dir.path(), &["identity"], "wrong-synthetic-password");
++    assert!(!bad.status.success());
++    assert!(bad.stdout.is_empty());
++    let both = call(
++        dir.path(),
++        &["--key-file", "nonexistent.key", "identity"],
++        fixture::PASSWORD,
++    );
++    assert!(!both.status.success());
++    assert!(both.stdout.is_empty());
++    assert!(!dir.path().join("owner.key").exists());
++}
+diff --git a/audit/vault-sign-2026-09-16.md b/audit/vault-sign-2026-09-16.md
+new file mode 100644
+index 0000000..e3532e7
+--- /dev/null
++++ b/audit/vault-sign-2026-09-16.md
+@@ -0,0 +1,20 @@
++# Vault signing integration — 2026-09-16
++
++The local CLI can use encrypted Vault custody with `--vault-home PATH
++--vault-root ID`, optionally `--vault-domain DOMAIN` or `--vault-path PATH`.
++Vault handles protected password input, derives the existing key internally and
++signs through durable encrypted receipts and two verified copies. The local
++authority holds its action grant throughout `SigningVault::sign`; graph
++publication and dispatch retain their independent current-permission checks.
++`--key-file` remains explicit legacy custody and cannot be combined with Vault.
++
++The full release workspace suite passed 47 tests. The new library integration
++test verifies signatures on real graph transitions and denies publication after
++revocation. The new process test activates a Neuron, installs a program, executes
++it and retries after restart using encrypted Vault custody, without a raw key
++file. CLI/node Clippy passed for all targets with owned-code warnings denied.
++
++This is the existing local-operator profile, not a remote Ward service or isolated
++signing process. It is implemented on top of the pre-existing uncommitted
++cell-to-neuron convergence; no real keys were migrated. See the
++[Vault evidence and isolated integration delta](../../vault/audit/sign-2026-09-16/README.md).

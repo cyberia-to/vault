@@ -97,6 +97,6 @@ universal interception.
 
 Revealable entries/codes use a separately authorized output surface. Clipboard
 copy is a disclosure permission with recipient/retention implications, never an
-inherited seed operation. Errors, telemetry, crash reports and debug formatting
+inherited spell operation. Errors, telemetry, crash reports and debug formatting
 MUST omit secret content. Memory protections and zeroization have their declared
 platform limits; they do not establish security against a compromised OS.

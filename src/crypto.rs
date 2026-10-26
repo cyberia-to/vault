@@ -117,11 +117,7 @@ impl Packet {
         let mut buffer = plaintext;
         let cipher = XChaCha20Poly1305::new((&*keys.0).into());
         cipher
-            .encrypt_in_place(
-                XNonce::from_slice(&packet.nonce),
-                &packet.aad(),
-                &mut *buffer,
-            )
+            .encrypt_in_place(&XNonce::from(packet.nonce), &packet.aad(), &mut *buffer)
             .map_err(|_| Error::Authentication)?;
         packet.ciphertext = buffer.to_vec();
         Ok(packet)
@@ -144,11 +140,7 @@ impl Packet {
     pub fn open(&self, keys: &Keys) -> Result<Zeroizing<Vec<u8>>> {
         let mut plaintext = Zeroizing::new(self.ciphertext.clone());
         XChaCha20Poly1305::new((&*keys.0).into())
-            .decrypt_in_place(
-                XNonce::from_slice(&self.nonce),
-                &self.aad(),
-                &mut *plaintext,
-            )
+            .decrypt_in_place(&XNonce::from(self.nonce), &self.aad(), &mut *plaintext)
             .map_err(|_| Error::Authentication)?;
         Ok(plaintext)
     }
@@ -221,7 +213,7 @@ fn wrap(key: &[u8; 32], aad: &[u8], data: &[u8; 32]) -> Result<[u8; WRAP_BYTES]>
     let nonce = random::<24>()?;
     let mut bytes = Zeroizing::new(data.to_vec());
     XChaCha20Poly1305::new(key.into())
-        .encrypt_in_place(XNonce::from_slice(&nonce), aad, &mut *bytes)
+        .encrypt_in_place(&XNonce::from(nonce), aad, &mut *bytes)
         .map_err(|_| Error::Authentication)?;
     let mut wrapped = [0; WRAP_BYTES];
     wrapped[..24].copy_from_slice(&nonce);
@@ -229,9 +221,10 @@ fn wrap(key: &[u8; 32], aad: &[u8], data: &[u8; 32]) -> Result<[u8; WRAP_BYTES]>
     Ok(wrapped)
 }
 fn unwrap(key: &[u8; 32], aad: &[u8], wrapped: &[u8; WRAP_BYTES]) -> Result<Keys> {
+    let nonce: [u8; 24] = wrapped[..24].try_into().map_err(|_| Error::Corrupt)?;
     let mut bytes = Zeroizing::new(wrapped[24..].to_vec());
     XChaCha20Poly1305::new(key.into())
-        .decrypt_in_place(XNonce::from_slice(&wrapped[..24]), aad, &mut *bytes)
+        .decrypt_in_place(&XNonce::from(nonce), aad, &mut *bytes)
         .map_err(|_| Error::Authentication)?;
     Ok(Keys(Zeroizing::new(
         bytes.as_slice().try_into().map_err(|_| Error::Corrupt)?,

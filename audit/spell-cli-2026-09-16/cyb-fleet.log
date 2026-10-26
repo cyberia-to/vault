@@ -1,0 +1,29 @@
+bash harness/fleet.sh
+fleet: 3 bodies, 45s, work dir /tmp/cyb-fleet.siEk4K
+fleet: building debug binary...
+fleet: bodies up, letting them live 45s...
+fleet: asserting...
+  ok    fleet networks: chain answered 23 status probes (>= 3 bodies)
+  ok    fleet relay: chain received 12 links from living bodies
+  ok    env-1 boot: self-shot rendered
+  ok    env-1 identity: spell minted
+  ok    env-1 graph: graph.log grew (2178 bytes)
+  ok    env-1 networks: pussy synced despite the blackhole (h=125)
+  ok    env-1 prover: 64 verified tickets
+  ok    env-2 boot: self-shot rendered
+  ok    env-2 identity: spell minted
+  ok    env-2 graph: graph.log grew (1936 bytes)
+  ok    env-2 networks: pussy synced despite the blackhole (h=125)
+  ok    env-2 prover: 64 verified tickets
+  ok    env-3 boot: self-shot rendered
+  ok    env-3 identity: spell minted
+  ok    env-3 graph: graph.log grew (1936 bytes)
+  ok    env-3 networks: pussy synced despite the blackhole (h=125)
+  ok    env-3 prover: 64 verified tickets
+  ok    fleet identity: 3 distinct spells
+  ok    fleet beacon: every recorded root IS sha256(height) - true chain state
+  ok    fleet vault: sealed, zero plaintext leaks
+  ok    fleet orphans: none
+
+fleet: 21 ok, 0 failed
+fleet: GREEN

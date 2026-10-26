@@ -13,7 +13,7 @@ limits and reproducible evidence in `audit/`.
 The first qualification setup has an isolated native writer, a durable local
 store and two replica stores in declared independent failure domains. Use
 synthetic secrets for every supported type. Required types for the first product
-slice are seed/key, password/PIN, TOTP, HOTP, recovery codes and service tokens;
+slice are spell/key, password/PIN, TOTP, HOTP, recovery codes and service tokens;
 passkeys and hardware custody require separately qualified profiles.
 
 ## Acceptance matrix
@@ -51,7 +51,7 @@ its limits rather than promoting those claims from a mock implementation.
 ## First product demonstration
 
 1. Create a Vault with independently retained recovery material. Store synthetic
-   passwords/PINs, external OTP enrollments, recovery codes, tokens and a seed.
+   passwords/PINs, external OTP enrollments, recovery codes, tokens and a spell.
 2. Derive a neuron without exposing its key; perform approved credential/OTP
    uses, including a pre-reserved offline use with uncertain provider outcome.
 3. Reach Protected(R), then restore-check R on a separate passive destination.
