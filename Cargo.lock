@@ -393,7 +393,7 @@ dependencies = [
 
 [[package]]
 name = "cyber-hemera"
-version = "0.3.1"
+version = "0.4.0"
 
 [[package]]
 name = "cyber-lens"
@@ -405,6 +405,7 @@ dependencies = [
  "cyber-lens-core",
  "cyber-lens-ikat",
  "cyber-lens-porphyry",
+ "cyber-lens-rspcs",
 ]
 
 [[package]]
@@ -462,6 +463,15 @@ dependencies = [
  "cyber-hemera",
  "cyber-lens-core",
  "strata-genies",
+]
+
+[[package]]
+name = "cyber-lens-rspcs"
+version = "0.1.0"
+dependencies = [
+ "cyber-hemera",
+ "cyber-lens-core",
+ "strata-nebu",
 ]
 
 [[package]]
@@ -1812,7 +1822,9 @@ dependencies = [
  "cyber-hemera",
  "cyber-lens",
  "cyber-nox",
+ "getrandom 0.3.4",
  "strata-nebu",
+ "zeroize",
 ]
 
 [[package]]
