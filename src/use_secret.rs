@@ -70,8 +70,8 @@ pub(crate) fn perform(entry: &mut Entry, operation: &Operation, now: u64) -> Res
                     let seed = Zeroizing::new(
                         <[u8; 64]>::try_from(bytes.as_slice()).map_err(|_| Error::Corrupt)?,
                     );
-                    let signing =
-                        mudra::seed::signing_key(&seed, path).map_err(|_| Error::InvalidInput)?;
+                    let signing = mudra::spell::signing_key(&seed, path)
+                        .map_err(|_| Error::InvalidInput)?;
                     let public = mudra::cosmos::compressed(signing.verifying_key());
                     let address =
                         mudra::cosmos::address(&public, hrp).map_err(|_| Error::InvalidInput)?;

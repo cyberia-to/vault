@@ -144,7 +144,7 @@ fn derive_neuron_preserves_mudra_bridge_and_domain_public_bytes() {
         NeuronKeyRef {
             root: seed,
             derivation: Derivation::Cosmos {
-                path: mudra::seed::COSMOS_PATH.into(),
+                path: mudra::spell::COSMOS_PATH.into(),
                 hrp: "cosmos".into(),
             },
         },
@@ -159,7 +159,7 @@ fn derive_neuron_preserves_mudra_bridge_and_domain_public_bytes() {
     for profile in profiles {
         let (expected_public, expected_address) = match &profile.derivation {
             Derivation::Cosmos { hrp, .. } => {
-                let key = mudra::seed::cosmos_key(words, "").unwrap();
+                let key = mudra::spell::cosmos_key(words, "").unwrap();
                 let pk = mudra::cosmos::compressed(key.verifying_key());
                 (pk, mudra::cosmos::address(&pk, hrp).unwrap())
             }

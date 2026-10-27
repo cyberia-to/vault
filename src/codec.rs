@@ -81,3 +81,106 @@ impl<'a> Decoder<'a> {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn scalar_fields_round_trip() {
+        let mut e = Encoder::new();
+        e.byte(7);
+        e.u32(0x0102_0304);
+        e.u64(0x0102_0304_0506_0708);
+        e.fixed(&[9, 9, 9]);
+        let mut d = Decoder::new(&e.0).unwrap();
+        assert_eq!(d.byte().unwrap(), 7);
+        assert_eq!(d.u32().unwrap(), 0x0102_0304);
+        assert_eq!(d.u64().unwrap(), 0x0102_0304_0506_0708);
+        assert_eq!(d.array::<3>().unwrap(), [9, 9, 9]);
+        d.finish().unwrap();
+    }
+
+    #[test]
+    fn bytes_and_text_round_trip() {
+        let mut e = Encoder::new();
+        e.bytes(b"payload").unwrap();
+        e.text("hello").unwrap();
+        let mut d = Decoder::new(&e.0).unwrap();
+        assert_eq!(d.bytes(64).unwrap(), b"payload");
+        assert_eq!(d.text(64).unwrap(), "hello");
+        d.finish().unwrap();
+    }
+
+    #[test]
+    fn decoder_bytes_rejects_length_over_max() {
+        let mut e = Encoder::new();
+        e.bytes(b"0123456789").unwrap();
+        let mut d = Decoder::new(&e.0).unwrap();
+        assert_eq!(d.bytes(4), Err(Error::Limit));
+    }
+
+    #[test]
+    fn decoder_bytes_declaring_more_than_present_is_corrupt() {
+        // A hand-built frame that declares a 100-byte payload but supplies none.
+        let mut e = Encoder::new();
+        e.u32(100);
+        let mut d = Decoder::new(&e.0).unwrap();
+        assert_eq!(d.bytes(1000), Err(Error::Corrupt));
+    }
+
+    #[test]
+    fn take_past_the_end_is_corrupt_not_a_panic() {
+        let bytes = [1u8, 2, 3];
+        let mut d = Decoder::new(&bytes).unwrap();
+        assert_eq!(d.take(2).unwrap(), &[1, 2]);
+        assert_eq!(d.take(2), Err(Error::Corrupt));
+    }
+
+    #[test]
+    fn array_on_a_truncated_tail_is_corrupt() {
+        let bytes = [1u8, 2];
+        let mut d = Decoder::new(&bytes).unwrap();
+        assert_eq!(d.array::<4>(), Err(Error::Corrupt));
+    }
+
+    #[test]
+    fn text_rejects_invalid_utf8() {
+        let mut e = Encoder::new();
+        e.bytes(&[0xff, 0xfe]).unwrap();
+        let mut d = Decoder::new(&e.0).unwrap();
+        assert_eq!(d.text(64), Err(Error::Corrupt));
+    }
+
+    #[test]
+    fn finish_rejects_unconsumed_trailing_bytes() {
+        let bytes = [1u8, 2, 3];
+        let mut d = Decoder::new(&bytes).unwrap();
+        d.byte().unwrap();
+        assert_eq!(d.finish(), Err(Error::Corrupt));
+    }
+
+    #[test]
+    fn remaining_tracks_position() {
+        let bytes = [1u8, 2, 3, 4];
+        let mut d = Decoder::new(&bytes).unwrap();
+        assert_eq!(d.remaining(), 4);
+        d.take(1).unwrap();
+        assert_eq!(d.remaining(), 3);
+        d.take(3).unwrap();
+        assert_eq!(d.remaining(), 0);
+    }
+
+    #[test]
+    fn decoder_new_rejects_a_buffer_over_the_packet_limit() {
+        let bytes = vec![0u8; MAX_PACKET_BYTES + 1];
+        assert_eq!(Decoder::new(&bytes).err(), Some(Error::Limit));
+    }
+
+    #[test]
+    fn encoder_bytes_rejects_growing_past_the_packet_limit() {
+        let mut e = Encoder::new();
+        let v = vec![0u8; MAX_PACKET_BYTES - 3];
+        assert_eq!(e.bytes(&v), Err(Error::Limit));
+    }
+}
