@@ -1,4 +1,6 @@
-# vault — secret custody, durable storage and private synchronization
+# AGENTS.md — vault
+
+> the doctrine of the home is `~/cyber/AGENTS.md`; it applies here first. Claude Code receives both files at session start through `~/.config/cyber/agents-md.nu`; other agents read them in order.
 
 This repository owns Vault's product, secret schemas, custody operations,
 encrypted-record semantics, synchronization rules and recovery contract.
