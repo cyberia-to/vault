@@ -16,7 +16,7 @@ of the product binary; repository, organ, crate and process are separate units.
 |---|---|
 | Vault | Secret schemas/lifecycle, protected use, encryption envelopes, replica/recovery policy and validation of restored secrets |
 | Soul / Ward | Policy configuration / sole permission authority, including grants and revocations |
-| Mudra | Cryptographic primitives, derivation and profile-specific authentication/verification |
+| Neuron / neuron-auth | Cryptographic primitives, derivation and profile-specific authentication/verification |
 | Neuron | Protocol subject/binding references, exact action intents and durable execution through host ports |
 | Sigma | Assets, neuron attachments and active subject selection |
 | Cybergraph | Canonical application history, schema/admission integration, private storage and sync entry points |
@@ -31,7 +31,7 @@ flowchart TD
     Client[cyb or headless client] --> Ward[Ward authorization]
     Ward --> Vault[Vault custody service]
     Input[Protected entry surface] --> Vault
-    Vault --> Mudra[Mudra primitives]
+    Vault --> Auth[neuron-auth primitives]
     Vault --> Graph[Cybergraph private application ports]
     Graph --> DB[BBG shared Database]
     Graph --> Sync[Selected synchronization adapter]

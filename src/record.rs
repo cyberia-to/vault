@@ -69,7 +69,7 @@ impl SecretInput {
             return Err(Error::Limit);
         }
         let spell = Zeroizing::new(
-            mudra::spell::derive(words, passphrase).map_err(|_| Error::InvalidInput)?,
+            neuron_auth::spell::derive(words, passphrase).map_err(|_| Error::InvalidInput)?,
         );
         Self::bytes(SecretKind::Spell, Zeroizing::new(spell.to_vec()))
     }

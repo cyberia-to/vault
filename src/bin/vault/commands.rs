@@ -166,7 +166,7 @@ pub fn run(args: Args) -> Result<()> {
             let derivation = match domain {
                 Some(domain) => Derivation::Domain { domain, hrp },
                 None => Derivation::Cosmos {
-                    path: path.unwrap_or_else(|| mudra::spell::COSMOS_PATH.into()),
+                    path: path.unwrap_or_else(|| neuron_auth::spell::COSMOS_PATH.into()),
                     hrp,
                 },
             };
@@ -193,7 +193,7 @@ pub fn run(args: Args) -> Result<()> {
             let derivation = match domain {
                 Some(domain) => Derivation::Domain { domain, hrp },
                 None => Derivation::Cosmos {
-                    path: path.unwrap_or_else(|| mudra::spell::COSMOS_PATH.into()),
+                    path: path.unwrap_or_else(|| neuron_auth::spell::COSMOS_PATH.into()),
                     hrp,
                 },
             };

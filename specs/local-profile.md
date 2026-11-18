@@ -21,14 +21,14 @@ single-writer-replicated-v1 deployment profile.
 | HOTP | Reserve and persist the next counter before code release |
 | Recovery codes | Reserve an unused code before release; exact retries retain the original reservation |
 | BIP-39 spell | Import through the trusted host; derive existing Cosmos-path public credentials inside custody |
-| Domain root | Generate inside custody; derive existing Mudra domain public credentials inside custody |
+| Domain root | Generate inside custody; derive existing neuron-auth domain public credentials inside custody |
 
 `derive_neuron` returns the native `H(compressed_public_key)` subject, public key
 and existing compatibility address. A Cosmos address is not a foreign subject or
 a proof of external account control. [`sign`](sign.md) signs native action
-statements under the existing Mudra NSIG1 profile through the same protected-use
-protocol. Foreign binding, passkeys and raw key import need separate typed
-adapters. There is no raw root/private-key getter.
+statements under the existing neuron-auth NSIG1 profile through the same
+protected-use protocol. Foreign binding, passkeys and raw key import need separate
+typed adapters. There is no raw root/private-key getter.
 
 ## Encoding and limits
 

@@ -8,11 +8,16 @@ inside that trust boundary merely because it imports the library.
 
 ## Build and exercise
 
-Use the sibling `mudra`, `hemera`, `cybergraph`, `bbg` and their stack dependencies.
+Use the sibling `neuron` and its `auth` member (the `neuron-auth` crate at
+`../neuron/auth`), `hemera`, `cybergraph`, `bbg` and their stack dependencies.
 Cargo path dependencies intentionally reuse those implementations. This initial
 slice was checked against local sibling work, including unpublished changes;
 the [source manifest](../audit/local-custody-2026-09-16/source-state.json) records
-the tested state. `Cargo.lock` does not pin path dependencies to Git revisions.
+the tested state, which still names the pre-move `cyber-mudra` path. `neuron-auth`
+is provided by [neuron#10](https://github.com/cyberia-to/neuron/pull/10) at
+`40535ed5e1594cb98121a24acaab84ef65f28c6d`; until that lands on neuron's default
+branch, `../neuron/auth` is absent from a clean sibling checkout and this build
+fails. `Cargo.lock` does not pin path dependencies to Git revisions.
 A clean public clone is not yet a reproducible standalone distribution.
 
 ```sh

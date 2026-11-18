@@ -31,7 +31,8 @@ separate declared policies. Passphrase profiles require a salted memory-hard
 KDF and measured parameters; a low-entropy PIN alone cannot protect a copied
 database against offline guessing. Unlock MUST NOT require the same locked spell.
 Key separation also covers storage, replication authentication, recovery and
-neuron authority. Cryptographic algorithms remain Mudra/profile responsibilities.
+neuron authority. Cryptographic algorithms remain neuron-auth/profile
+responsibilities.
 
 ## Complete revision
 
