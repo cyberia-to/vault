@@ -132,7 +132,7 @@ fn totp_uses_ward_time_and_expired_receipt_does_not_mint_a_new_code() {
 }
 
 #[test]
-fn derive_neuron_preserves_mudra_bridge_and_domain_public_bytes() {
+fn derive_neuron_preserves_legacy_bridge_and_domain_public_bytes() {
     let mut f = Fixture::new();
     let words = "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about";
     let spell = f.put(SecretInput::spell(words, "").unwrap(), false);

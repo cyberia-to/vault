@@ -62,10 +62,10 @@ Data lost before replication cannot be recovered by a spell or a proof.
 ## How it fits
 
 Ward decides whether an operation is allowed. Vault keeps the secret and performs
-the permitted use. Mudra supplies cryptography. Cybergraph and BBG preserve its
-encrypted history; the selected synchronization and transport services move
-those encrypted records. Sigma manages neurons and assets. None of these roles
-requires applications or models to receive a root secret.
+the permitted use. Neuron's `neuron-auth` supplies cryptography. Cybergraph and
+BBG preserve its encrypted history; the selected synchronization and transport
+services move those encrypted records. Sigma manages neurons and assets. None of
+these roles requires applications or models to receive a root secret.
 
 One Vault can serve many neurons and networks. `derive_neuron` preserves existing
 identity profiles. Passwords and authenticators need no neuron of their own.
@@ -122,7 +122,7 @@ Sign without exporting the key:
 ./target/release/vault sign ENTRY_ID --subject NEURON_HEX --statement ACTION_COMMITMENT_HEX
 ```
 
-The existing Mudra NSIG1 profile preserves native IDs and signature bytes.
+The existing `neuron-auth` NSIG1 profile preserves native IDs and signature bytes.
 Trusted local hosts can embed `local::Signer` with the `local-host` feature.
 Neuron selects the same custody with `--vault-home PATH --vault-root ENTRY_ID`
 and optional `--vault-domain DOMAIN`. Its action grant remains checked while

@@ -241,7 +241,8 @@ fn sign_and_embedded_signer_share_custody_retries_and_exclusive_lock() {
     );
     let id = added["id"].as_str().unwrap();
     let key = neuron_auth::spell::cosmos_key(WORDS, "").unwrap();
-    let subject = neuron_auth::claim::neuron_of(&neuron_auth::cosmos::compressed(key.verifying_key()));
+    let subject =
+        neuron_auth::claim::neuron_of(&neuron_auth::cosmos::compressed(key.verifying_key()));
     let neuron = hex::encode(subject);
     let statement = hex::encode([8; 32]);
     let request = hex::encode([7; 32]);

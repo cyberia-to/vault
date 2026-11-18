@@ -267,7 +267,11 @@ impl Output {
                 e.text(address)?;
             }
             Self::Signature { request, evidence } => {
-                if !neuron_auth::neuron::verify_statement(request.subject, request.statement, evidence) {
+                if !neuron_auth::neuron::verify_statement(
+                    request.subject,
+                    request.statement,
+                    evidence,
+                ) {
                     return Err(Error::Corrupt);
                 }
                 e.byte(3);
@@ -298,7 +302,11 @@ impl Output {
                     return Err(Error::Corrupt);
                 };
                 let evidence = d.array::<102>()?.to_vec();
-                if !neuron_auth::neuron::verify_statement(request.subject, request.statement, &evidence) {
+                if !neuron_auth::neuron::verify_statement(
+                    request.subject,
+                    request.statement,
+                    &evidence,
+                ) {
                     return Err(Error::Corrupt);
                 }
                 Self::Signature { request, evidence }
@@ -316,7 +324,8 @@ mod tests {
     #[test]
     fn sign_wire_has_fixed_tags_and_rejects_truncation_trailing_and_changed_evidence() {
         let key = neuron_auth::SigningKey::from_bytes((&[7; 32]).into()).unwrap();
-        let subject = neuron_auth::claim::neuron_of(&neuron_auth::cosmos::compressed(key.verifying_key()));
+        let subject =
+            neuron_auth::claim::neuron_of(&neuron_auth::cosmos::compressed(key.verifying_key()));
         let request = SignRequest {
             key: NeuronKeyRef {
                 root: SecretRef([1; 16]),

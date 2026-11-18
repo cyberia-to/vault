@@ -74,7 +74,9 @@ fn both_derivations_preserve_legacy_bytes_and_retry_after_reopen() {
                 hrp: "cosmos".into(),
             },
         },
-        subject: neuron_auth::claim::neuron_of(&neuron_auth::cosmos::compressed(key.verifying_key())),
+        subject: neuron_auth::claim::neuron_of(&neuron_auth::cosmos::compressed(
+            key.verifying_key(),
+        )),
         statement: [8; 32],
     };
     for (signing, key) in [(domain, domain_key), (cosmos, key)] {

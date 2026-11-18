@@ -97,7 +97,8 @@ fn with_key(
             let signing =
                 neuron_auth::spell::signing_key(&spell, path).map_err(|_| Error::InvalidInput)?;
             let public = neuron_auth::cosmos::compressed(signing.verifying_key());
-            let address = neuron_auth::cosmos::address(&public, hrp).map_err(|_| Error::InvalidInput)?;
+            let address =
+                neuron_auth::cosmos::address(&public, hrp).map_err(|_| Error::InvalidInput)?;
             action(&signing, address)
         }
         (Derivation::Domain { domain, hrp }, SecretKind::DomainRoot) => {

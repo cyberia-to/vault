@@ -1,4 +1,8 @@
-# vault — secret custody, durable storage and private synchronization
+# AGENTS.md — vault
+
+> the doctrine of the home is `~/cyber/AGENTS.md`; it applies here first. Claude Code receives both files at session start through `~/.config/cyber/agents-md.nu`; other agents read them in order.
+
+vault — secret custody, durable storage and private synchronization.
 
 This repository owns Vault's product, secret schemas, custody operations,
 encrypted-record semantics, synchronization rules and recovery contract.
@@ -10,9 +14,10 @@ README.md is the product entry; specs/README.md indexes the contracts.
   release evidence belong in audit/, not specs/.
 - Preserve `derive_neuron`, existing identity/derivation/signature bytes and
   native/foreign subject distinctions. Vault references are not new subjects.
-- Ward owns permission; Mudra owns crypto; Cybergraph owns history; BBG owns
-  physical durability; existing stack components own transport and consensus.
-  Do not create competing permission, database or synchronization engines.
+- Ward owns permission; Neuron's `neuron-auth` owns crypto; Cybergraph owns
+  history; BBG owns physical durability; existing stack components own transport
+  and consensus. Do not create competing permission, database or synchronization
+  engines.
 - Never inspect or import real user secrets for development. Use synthetic
   fixtures. No spell, key, password, token, plaintext database or recovery kit
   belongs in Git, logs, command arguments or model context.
