@@ -26,8 +26,9 @@ migration; do not claim deletion from SSDs or backups.
 
 ## Next implementation sequence
 
-1. Publish compatible Cybergraph/BBG/Mudra dependency revisions and build this
-   slice from clean checkouts in CI. The initial evidence uses local sibling work.
+1. Publish compatible Cybergraph/BBG/`neuron-auth` dependency revisions and
+   build this slice from clean checkouts in CI. The initial evidence uses local
+   sibling work.
 2. Wrap the library in native custody isolation and implement real Ward caller
    authentication, current authorization and protected input/output adapters.
    Keep the same `derive_neuron` results while moving Neuron clients behind them.
