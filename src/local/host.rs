@@ -41,6 +41,16 @@ pub struct Pending {
     pub previous: Option<Anchor>,
     pub candidate: Anchor,
 }
+/// A derived public neuron subject. It is deterministic from the key reference
+/// and the root version, so retaining it keeps repeated opens free of durable
+/// writes. It holds no key material; a tampered record only makes signing fail,
+/// because custody re-checks that the key owns the requested subject.
+#[derive(Clone, Serialize, Deserialize)]
+pub struct SubjectRecord {
+    pub key: [u8; 32],
+    pub version: u64,
+    pub subject: [u8; 32],
+}
 #[derive(Clone, Serialize, Deserialize)]
 pub struct ReplicaConfig {
     pub id: [u8; 32],
@@ -56,6 +66,8 @@ pub struct State {
     pub anchor: Option<Anchor>,
     pub pending: Option<Pending>,
     pub replicas: Vec<ReplicaConfig>,
+    #[serde(default)]
+    pub subjects: Vec<SubjectRecord>,
 }
 impl State {
     pub fn new() -> Result<Self> {
@@ -67,6 +79,7 @@ impl State {
             anchor: None,
             pending: None,
             replicas: vec![],
+            subjects: vec![],
         })
     }
     pub fn context(&self) -> Context {
@@ -81,6 +94,7 @@ impl State {
         }
         Ok(Self {
             replicas: vec![],
+            subjects: vec![],
             ..self.clone()
         })
     }
@@ -93,6 +107,8 @@ impl State {
         Ok(s)
     }
 }
+
+const SUBJECT_RECORDS: usize = 16;
 
 pub struct Host {
     pub store: Arc<JournaledStore>,
@@ -154,6 +170,30 @@ impl Host {
         io::replace(&self.store.file, &serde_json::to_vec(&state)?)?;
         *current = state;
         Ok(())
+    }
+    /// The retained subject for this key reference at this root version, if any.
+    pub fn subject(&self, key: [u8; 32], version: u64) -> Result<Option<[u8; 32]>> {
+        Ok(self
+            .state()?
+            .subjects
+            .iter()
+            .find(|s| s.key == key && s.version == version)
+            .map(|s| s.subject))
+    }
+    /// Retains one public subject per key reference, bounded so the host file
+    /// stays well inside its read limit.
+    pub fn remember_subject(&self, key: [u8; 32], version: u64, subject: [u8; 32]) -> Result<()> {
+        let mut state = self.state()?;
+        state.subjects.retain(|s| s.key != key);
+        state.subjects.push(SubjectRecord {
+            key,
+            version,
+            subject,
+        });
+        while state.subjects.len() > SUBJECT_RECORDS {
+            state.subjects.remove(0);
+        }
+        self.save(state)
     }
     /// Only a candidate retained before append can advance the checkpoint.
     /// The caller must authenticate the complete chain before `settle`.

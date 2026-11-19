@@ -156,6 +156,32 @@ impl<S: CipherStore> Vault<S> {
         self.mode = AccessMode::Locked;
     }
 
+    /// Current metadata for one entry, read-only: it commits no receipt and
+    /// appends no revision. Hosts use it to check an entry version before a
+    /// protected use.
+    pub fn entry_info<W: Ward>(
+        &self,
+        context: Context,
+        secret: SecretRef,
+        ward: &W,
+    ) -> Result<EntryInfo> {
+        self.ready(false)?;
+        let intent = Intent {
+            vault: self.id(),
+            request: RequestId([0; 32]),
+            context,
+            kind: IntentKind::Inspect,
+            binding: [0; 32],
+        };
+        ward.with_authorization(&intent, |_| {
+            self.current()?;
+            let info = self.read_entry(secret)?.info;
+            if info.policy != context.policy {
+                return Err(Error::Denied);
+            }
+            Ok(info)
+        })
+    }
     /// Convenience collector. Use inspect_page to bound response memory.
     pub fn inspect<W: Ward>(&self, context: Context, ward: &W) -> Result<Vec<EntryInfo>> {
         self.inspect_inner(context, None, None, ward)

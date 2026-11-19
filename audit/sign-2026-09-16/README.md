@@ -7,7 +7,8 @@ encrypted result, verifying two replica copies and checking current permission.
 
 The `local-host` feature factors the existing CLI host into shared library code.
 `local::Signer` uses the same owner-only paths, exclusive lock, retained candidate
-journal and authenticated restart reconciliation. Neuron's `LocalVault` adapter
+journal and authenticated restart reconciliation, and retains the derived public
+subject per key reference and root version so that reopening commits nothing. Neuron's `LocalVault` adapter
 uses that signer through `SigningVault::sign`; its current action grant covers
 the entire call. The CLI selects custody with `--vault-home` and `--vault-root`,
 with explicit spell-path or domain derivation. The old raw-key path is explicit
@@ -17,17 +18,28 @@ and mutually exclusive; failures never select it as a fallback.
 
 All inputs were synthetic; no real user custody was opened or migrated.
 
-| Check | Result |
+**This directory retains no run log.** The runs below were executed on the
+author's desk against sibling working trees; nothing in this tree confirms them
+independently, and the build server's gate on the reviewed commit is the only
+evidence a reader can check. The logs retained under [the CLI qualification](../spell-cli-2026-09-16/README.md)
+predate the signing work: `release-tests.log` totals 39 passing tests, lists
+four tests in `tests/cli.rs` where the suite now has five, and contains no
+`tests/sign.rs` section.
+
+What the tree itself shows: 46 `#[test]` functions across the library and the
+integration suites, of which `tests/sign.rs` holds four and `tests/cli.rs` five.
+
+| Check | Reported result, not retained here |
 |---|---|
 | Vault full release suite | 45 tests passed, including the existing 4,352-entry/history recovery case |
-| Added canonical signing-codec test | Passed; 46 distinct Vault tests across these runs |
+| Added canonical signing-codec test | Passed |
 | Vault minimal features | 8 tests passed |
 | Vault Clippy, all targets, owned code | Passed with `-D warnings` |
 | Neuron full release workspace suite | 47 tests passed |
 | Neuron CLI/node Clippy, all targets, owned code | Passed with `-D warnings` |
 | Mudra library / independent Cosmos vectors | 19 + 2 tests passed |
 | Mudra minimal-feature library | 16 tests passed |
-| Release binaries and real pseudo-terminal exercise | Built; hidden input, terminal-only output, HOTP retries and root-reveal denial passed |
+| Release binaries and pseudo-terminal exercise | Built; hidden input, terminal-only output, HOTP retries and root-reveal denial passed |
 
 Signing tests compare both spell/Cosmos and domain-root outputs with an
 independently assembled legacy ADR-036 envelope. They cover HRP independence,
@@ -53,13 +65,11 @@ declared by the local custody profile.
 
 Tests use the compatible sibling working trees. Neuron already contained a large
 uncommitted cell-to-neuron convergence before this change. The integration is
-applied and tested there; [its isolated delta](neuron-integration.patch) records
-only this task's changes against that starting tree. It must land with the
+applied and tested there. Its isolated delta belongs to the companion Neuron
+pull request and is no longer vendored here: this repository does not carry
+another repository's working-tree diff. That delta must land with the
 convergence prerequisite; it is not a standalone patch against Neuron's old
 committed cell runtime. The unrelated working-tree changes remain preserved.
-
-The delta uses zero-context hunks (`git apply --unidiff-zero`); reverse-checking
-it against the tested Neuron tree passed without changing that tree.
 
 The Mudra change exposes the existing native envelope with canonical `sign` and
 a compatibility alias. Its unrelated identity-crate/dependency/proving changes

@@ -50,7 +50,12 @@ still requires current authorization and verified copies. The `local-host` libra
 feature exposes `local::Signer` for trusted embedding. It shares the CLI's exact
 lock, checkpoint journal, secret-input surface and replica checks. Its caller must
 interpret and authorize the action; it is not a permission grant for arbitrary
-programs. Neuron's local authority holds its grant throughout the signing call.
+programs. Opening a signer derives its public subject through one protected use
+per key reference and root version, and retains that public value in the host
+file; later opens read it and commit nothing. Entry versions are revision
+indexes and are never reused, so a retained subject always matches the current
+root, and custody still checks that the key owns the requested subject.
+Neuron's local authority holds its grant throughout the signing call.
 
 ## Durability and retries
 

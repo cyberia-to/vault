@@ -310,9 +310,14 @@ fn sign_and_embedded_signer_share_custody_retries_and_exclusive_lock() {
     );
     assert!(signer.sign(vault::RequestId([7; 32]), [9; 32]).is_err());
     drop(signer);
+    // Reopening an already derived key must append no revision: it reads the
+    // retained public subject instead of committing another protected use.
+    let settled = c.ok(&["status"], &[])["anchor"].clone();
     let mut reopened = vault::local::Signer::open(&c.home, reference, UNLOCK.as_bytes()).unwrap();
     assert_eq!(
         reopened.sign(vault::RequestId([7; 32]), [8; 32]).unwrap(),
         signature
     );
+    drop(reopened);
+    assert_eq!(c.ok(&["status"], &[])["anchor"], settled);
 }

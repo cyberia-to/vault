@@ -8,7 +8,8 @@ pub mod io;
 pub mod owner;
 
 use crate::{
-    GraphStore, NeuronKeyRef, Operation, Output, Replica, RequestId, SignRequest, Vault, VaultId,
+    Context, GraphStore, NeuronKeyRef, Operation, Output, Replica, RequestId, SignRequest, Vault,
+    VaultId,
 };
 use host::{Host, JournaledStore};
 use owner::{Grant, Owner};
@@ -44,20 +45,26 @@ impl Signer {
         )?;
         host.settle(vault.revision())?;
         let replicas = host::replicas(&host)?;
-        let request = RequestId::random()?;
-        let ward = Owner {
+        let context = state.context();
+        let inspect = Owner {
             vault: vault.id(),
-            context: state.context(),
-            request,
-            grant: Grant::Use(Operation::DeriveNeuron(key.clone())),
+            context,
+            request: RequestId([0; 32]),
+            grant: Grant::Inspect,
         };
-        let pending = vault.derive_neuron(ward.context, request, key.clone(), &ward)?;
-        host.settle(vault.revision())?;
-        let copies = vault.replicate(&replicas)?;
-        let subject = vault.release(ward.context, &pending, &copies, &ward, |out| match out {
-            Output::Neuron { subject, .. } => Ok(subject),
-            _ => Err(crate::Error::Corrupt),
-        })?;
+        let version = vault.entry_info(context, key.root, &inspect)?.version;
+        let name = fingerprint(&key)?;
+        // Entry versions are revision indexes and are never reused, so a
+        // retained subject is exact. Opening an already derived key therefore
+        // commits no receipt and reads back no history.
+        let subject = match host.subject(name, version)? {
+            Some(subject) => subject,
+            None => {
+                let subject = Self::derive(&host, &mut vault, context, &key, &replicas)?;
+                host.remember_subject(name, version, subject)?;
+                subject
+            }
+        };
         Ok(Self {
             vault,
             host,
@@ -65,6 +72,32 @@ impl Signer {
             key,
             subject,
         })
+    }
+
+    /// One protected use per key reference and root version: it commits an
+    /// encrypted receipt, verifies the copies and releases public credentials.
+    fn derive(
+        host: &Host,
+        vault: &mut Vault<Arc<JournaledStore>>,
+        context: Context,
+        key: &NeuronKeyRef,
+        replicas: &[Replica<GraphStore>],
+    ) -> Result<[u8; 32]> {
+        let request = RequestId::random()?;
+        let ward = Owner {
+            vault: vault.id(),
+            context,
+            request,
+            grant: Grant::Use(Operation::DeriveNeuron(key.clone())),
+        };
+        let pending = vault.derive_neuron(context, request, key.clone(), &ward)?;
+        host.settle(vault.revision())?;
+        let copies = vault.replicate(replicas)?;
+        let subject = vault.release(context, &pending, &copies, &ward, |out| match out {
+            Output::Neuron { subject, .. } => Ok(subject),
+            _ => Err(crate::Error::Corrupt),
+        })?;
+        Ok(subject)
     }
 
     pub fn subject(&self) -> [u8; 32] {
@@ -97,4 +130,11 @@ impl Signer {
                 _ => Err(crate::Error::Corrupt),
             })?)
     }
+}
+
+/// A stable name for a key reference, over its canonical operation encoding.
+fn fingerprint(key: &NeuronKeyRef) -> Result<[u8; 32]> {
+    let mut bytes = b"vault:local:subject:v1:".to_vec();
+    bytes.extend_from_slice(&Operation::DeriveNeuron(key.clone()).encode()?);
+    Ok(*hemera::hash(&bytes).as_bytes())
 }

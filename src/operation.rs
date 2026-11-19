@@ -80,37 +80,15 @@ impl Operation {
                 e.byte(4);
                 e.fixed(&secret.0);
             }
-            Self::DeriveNeuron(_) | Self::Sign(_) => {
-                let (tag, k) = match self {
-                    Self::DeriveNeuron(k) => (5, k),
-                    Self::Sign(request) => (6, &request.key),
-                    _ => unreachable!(),
-                };
-                e.byte(tag);
-                e.fixed(&k.root.0);
-                match &k.derivation {
-                    Derivation::Cosmos { path, hrp } => {
-                        bounded(path, 256)?;
-                        bounded(hrp, 83)?;
-                        e.byte(1);
-                        e.text(path)?;
-                        e.text(hrp)?;
-                    }
-                    Derivation::Domain { domain, hrp } => {
-                        bounded(domain, 253)?;
-                        bounded(hrp, 83)?;
-                        if !domain.is_ascii() || domain.contains('\0') {
-                            return Err(Error::InvalidInput);
-                        }
-                        e.byte(2);
-                        e.text(domain)?;
-                        e.text(hrp)?;
-                    }
-                }
-                if let Self::Sign(request) = self {
-                    e.fixed(&request.subject);
-                    e.fixed(&request.statement);
-                }
+            Self::DeriveNeuron(key) => {
+                e.byte(5);
+                encode_key(&mut e, key)?;
+            }
+            Self::Sign(request) => {
+                e.byte(6);
+                encode_key(&mut e, &request.key)?;
+                e.fixed(&request.subject);
+                e.fixed(&request.statement);
             }
         }
         Ok(e.0)
@@ -161,6 +139,29 @@ impl Operation {
         op.encode()?;
         Ok(op)
     }
+}
+fn encode_key(e: &mut Encoder, key: &NeuronKeyRef) -> Result<()> {
+    e.fixed(&key.root.0);
+    match &key.derivation {
+        Derivation::Cosmos { path, hrp } => {
+            bounded(path, 256)?;
+            bounded(hrp, 83)?;
+            e.byte(1);
+            e.text(path)?;
+            e.text(hrp)?;
+        }
+        Derivation::Domain { domain, hrp } => {
+            bounded(domain, 253)?;
+            bounded(hrp, 83)?;
+            if !domain.is_ascii() || domain.contains('\0') {
+                return Err(Error::InvalidInput);
+            }
+            e.byte(2);
+            e.text(domain)?;
+            e.text(hrp)?;
+        }
+    }
+    Ok(())
 }
 fn bounded(value: &str, max: usize) -> Result<()> {
     if value.is_empty() || value.len() > max {
