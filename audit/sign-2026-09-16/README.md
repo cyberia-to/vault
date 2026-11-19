@@ -20,8 +20,13 @@ All inputs were synthetic; no real user custody was opened or migrated.
 
 **This directory retains no run log.** The runs below were executed on the
 author's desk against sibling working trees; nothing in this tree confirms them
-independently, and the build server's gate on the reviewed commit is the only
-evidence a reader can check. The logs retained under [the CLI qualification](../spell-cli-2026-09-16/README.md)
+independently. Neither does the build server's gate on this commit: it is red,
+because a clean checkout resolves a published `cybergraph` 0.1.1 that has no
+`local-storage` feature. **No independently checkable evidence of these runs
+exists yet.** It is still owed, as retained logs for the signing suite or as a
+green gate once the compatible sibling revisions are published.
+
+The logs retained under [the CLI qualification](../spell-cli-2026-09-16/README.md)
 predate the signing work: `release-tests.log` totals 39 passing tests, lists
 four tests in `tests/cli.rs` where the suite now has five, and contains no
 `tests/sign.rs` section.

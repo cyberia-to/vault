@@ -181,7 +181,9 @@ impl Host {
             .map(|s| s.subject))
     }
     /// Retains one public subject per key reference, bounded so the host file
-    /// stays well inside its read limit.
+    /// stays well inside its read limit. Past `SUBJECT_RECORDS` distinct key
+    /// references the oldest record is evicted, and the next open of that key
+    /// derives again; `specs/cli.md` states that ceiling.
     pub fn remember_subject(&self, key: [u8; 32], version: u64, subject: [u8; 32]) -> Result<()> {
         let mut state = self.state()?;
         state.subjects.retain(|s| s.key != key);
